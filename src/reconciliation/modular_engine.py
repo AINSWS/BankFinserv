@@ -5,6 +5,7 @@ Modular Bank Reconciliation Engine - Main orchestrator for all reconciliation op
 import pandas as pd
 import sys
 import os
+from typing import Dict, Any
 
 # Add processor and analyzer directories to path
 current_dir = os.path.dirname(__file__)
@@ -18,6 +19,7 @@ from demand_report_processor import DemandReportProcessor
 from merge_operations import MergeOperationsHandler
 from match_finder import MatchFinder
 from export_manager import ExportManager
+from phase3_processor import Phase3ReconciliationProcessor
 
 class ModularReconciliationEngine:
     """
@@ -53,6 +55,7 @@ class ModularReconciliationEngine:
         self.merge_handler = MergeOperationsHandler()
         self.match_finder = MatchFinder()
         self.export_manager = ExportManager()
+        self.phase3_processor = Phase3ReconciliationProcessor()
     
     # Bank Ledger Operations
     def extract_bank_ledger_data(self):
@@ -85,13 +88,14 @@ class ModularReconciliationEngine:
         merged_result = self.merge_sib_qr_with_demand_report()
         return self.merge_handler.create_merged_data_pivot_table(merged_result)
     
-    def merge_pivot_tables_comparison(self, include_stage2=True):
+    def merge_pivot_tables_comparison(self, include_stage2=True, include_phase3=True):
         """
         Merge Bank Ledger pivot with SIB QR/Demand pivot for reconciliation comparison
         Uses MergeOperationsHandler to maintain modular architecture
         
         Args:
             include_stage2: Whether to include Stage 2 group payment processing
+            include_phase3: Whether to include Phase 3 bank ledger narration analysis
         """
         # Get both pivot tables
         bank_pivot = self.create_bank_ledger_pivot_table()
@@ -103,6 +107,10 @@ class ModularReconciliationEngine:
         # Apply Stage 2 processing if requested and data is available
         if include_stage2 and result.get('status') == 'success':
             result = self._apply_stage2_to_main_data(result)
+        
+        # Apply Phase 3 processing if requested and data is available
+        if include_phase3 and result.get('status') == 'success':
+            result = self._apply_phase3_to_main_data(result)
         
         return result
     
@@ -482,10 +490,18 @@ class ModularReconciliationEngine:
             
             # Run Stage 2 processing (get mismatched data from current result to avoid recursion)
             main_data = reconciliation_result.get('merged_pivot_data')
-            status_col = 'status' if 'status' in main_data.columns else 'reconciliation_status'
-            mismatched_data = main_data[
-                main_data[status_col].str.contains('MISMATCH', na=False)
-            ].copy()
+            # CRITICAL: Use reconciliation_status, not status (which is for branch info)
+            if 'reconciliation_status' in main_data.columns:
+                status_col = 'reconciliation_status'
+                mismatched_data = main_data[
+                    main_data[status_col].str.contains('MISMATCH', na=False)
+                ].copy()
+            else:
+                # Fallback to status column if reconciliation_status doesn't exist
+                status_col = 'status'
+                mismatched_data = main_data[
+                    main_data[status_col].str.contains('MISMATCH', na=False)
+                ].copy()
             
             stage2_result = self.process_stage2_group_payments(mismatched_data)
             
@@ -549,10 +565,14 @@ class ModularReconciliationEngine:
             original_summary = reconciliation_result.get('reconciliation_summary', {})
             stage2_analysis = stage2_result.get('group_analysis', {})
             
-            # Calculate new match counts
-            status_col = 'status' if 'status' in updated_main_data.columns else 'reconciliation_status'
-            new_matched_count = len(updated_main_data[updated_main_data[status_col].str.contains('MATCHED', na=False)])
-            new_mismatch_count = len(updated_main_data[updated_main_data[status_col].str.contains('MISMATCH', na=False)])
+            # Calculate new match counts using the correct status column
+            if 'reconciliation_status' in updated_main_data.columns:
+                calc_status_col = 'reconciliation_status'
+            else:
+                calc_status_col = 'status'
+            
+            new_matched_count = len(updated_main_data[updated_main_data[calc_status_col].str.contains('MATCHED', na=False)])
+            new_mismatch_count = len(updated_main_data[updated_main_data[calc_status_col].str.contains('MISMATCH', na=False)])
             
             # Update summary
             total_records = original_summary.get('total_unique_loans', len(updated_main_data))
@@ -587,6 +607,206 @@ class ModularReconciliationEngine:
             
             # Return original result if Stage 2 application fails
             return reconciliation_result
+    
+    def _apply_phase3_to_main_data(self, reconciliation_result):
+        """
+        Apply Phase 3 narration analysis results to the main reconciliation data
+        This processes mismatched records using bank ledger credit/debit analysis
+        """
+        try:
+            main_data = reconciliation_result.get('merged_pivot_data')
+            if main_data is None or main_data.empty:
+                return reconciliation_result
+
+            # Get mismatched data for Phase 3 processing
+            # CRITICAL: Use reconciliation_status, not status (which is for branch info)
+            if 'reconciliation_status' in main_data.columns:
+                status_col = 'reconciliation_status'
+                mismatched_data = main_data[
+                    main_data[status_col].str.contains('MISMATCH', na=False)
+                ].copy()
+            else:
+                # Fallback to status column if reconciliation_status doesn't exist
+                status_col = 'status'
+                mismatched_data = main_data[
+                    main_data[status_col].str.contains('MISMATCH', na=False)
+                ].copy()
+            
+            if mismatched_data.empty:
+                print("ℹ️ No mismatched records for Phase 3 processing")
+                return reconciliation_result
+
+            # Process bank ledger for Phase 3 analysis
+            phase3_ledger_result = self.phase3_processor.process_bank_ledger_phase3(self.bank_ledger_df)
+            
+            if phase3_ledger_result.get('status') != 'success':
+                print("⚠️ Phase 3 bank ledger processing failed, skipping Phase 3")
+                return reconciliation_result
+            
+            # Run Phase 3 reconciliation on mismatched data
+            phase3_recon_result = self.phase3_processor.process_phase3_reconciliation(
+                mismatched_data,
+                phase3_ledger_result['debit_df'],
+                phase3_ledger_result['credit_df']
+            )
+            
+            if phase3_recon_result.get('status') != 'success':
+                print("⚠️ Phase 3 reconciliation failed, using original data")
+                return reconciliation_result
+
+            newly_matched = phase3_recon_result.get('newly_matched', pd.DataFrame())
+            
+            if newly_matched.empty:
+                print("ℹ️ No additional matches found in Phase 3")
+                return reconciliation_result
+
+            print(f"🔄 Applying {len(newly_matched)} Phase 3 results to main reconciliation data...")
+            
+            # Create a copy of main data for modification
+            updated_main_data = main_data.copy()
+            
+            # Update records that were resolved in Phase 3
+            for _, phase3_record in newly_matched.iterrows():
+                loan_id = str(phase3_record['loan_id'])  # Ensure string type
+                
+                # Find the matching record in main data
+                mask = updated_main_data['loan_id'].astype(str) == loan_id
+                matching_rows = updated_main_data[mask]
+                
+                if not matching_rows.empty:
+                    # Update the record with Phase 3 results
+                    idx = matching_rows.index[0]
+                    
+                    # Update BOTH status columns for export compatibility
+                    phase3_status = phase3_record['status']
+                    updated_main_data.loc[idx, 'status'] = phase3_status
+                    updated_main_data.loc[idx, 'reconciliation_status'] = phase3_status
+                    updated_main_data.loc[idx, 'reconciliation_method'] = phase3_record.get('reconciliation_method', 'Phase 3: Credit/Debit Analysis')
+                    
+                    # Add Phase 3 specific columns
+                    if 'phase3_debit_total' in phase3_record:
+                        updated_main_data.loc[idx, 'phase3_debit_total'] = phase3_record['phase3_debit_total']
+                    if 'phase3_credit_total' in phase3_record:
+                        updated_main_data.loc[idx, 'phase3_credit_total'] = phase3_record['phase3_credit_total']
+                    if 'phase3_difference' in phase3_record:
+                        updated_main_data.loc[idx, 'phase3_difference'] = phase3_record['phase3_difference']
+                    if 'phase3_match_difference' in phase3_record:
+                        updated_main_data.loc[idx, 'phase3_match_difference'] = phase3_record['phase3_match_difference']
+
+            # Update the result with modified data
+            reconciliation_result['merged_pivot_data'] = updated_main_data
+            
+            # Update simplified_report for export compatibility
+            if 'simplified_report' in reconciliation_result:
+                new_simplified_report = self.merge_handler._create_simplified_final_report(updated_main_data)
+                if new_simplified_report is not None:
+                    reconciliation_result['simplified_report'] = new_simplified_report
+                else:
+                    reconciliation_result['simplified_report'] = updated_main_data
+
+            # Update summary statistics
+            original_summary = reconciliation_result.get('reconciliation_summary', {})
+            phase3_analysis = phase3_recon_result.get('phase3_analysis', {})
+            
+            # Calculate new match counts using the correct status column
+            if 'reconciliation_status' in updated_main_data.columns:
+                calc_status_col = 'reconciliation_status'
+            else:
+                calc_status_col = 'status'
+            
+            new_matched_count = len(updated_main_data[updated_main_data[calc_status_col].str.contains('MATCHED', na=False)])
+            new_mismatch_count = len(updated_main_data[updated_main_data[calc_status_col].str.contains('MISMATCH', na=False)])
+            
+            # Update summary
+            total_records = original_summary.get('total_unique_loans', len(updated_main_data))
+            if total_records > 0:
+                new_match_percentage = (new_matched_count / total_records) * 100
+            else:
+                new_match_percentage = 0
+            
+            updated_summary = original_summary.copy()
+            updated_summary.update({
+                'total_matches': new_matched_count,
+                'amount_mismatches': new_mismatch_count,
+                'match_percentage': new_match_percentage,
+                'phase3_records_analyzed': phase3_analysis.get('total_analyzed', 0),
+                'phase3_records_resolved': len(newly_matched),
+                'phase3_resolution_rate': phase3_analysis.get('resolution_rate', 0),
+                'phase3_applied': True
+            })
+            
+            reconciliation_result['reconciliation_summary'] = updated_summary
+            reconciliation_result['phase3_result'] = phase3_recon_result
+            reconciliation_result['phase3_ledger_processing'] = phase3_ledger_result
+            
+            print(f"✅ Phase 3 applied: {len(newly_matched)} records resolved via credit/debit analysis, "
+                  f"match rate improved to {new_match_percentage:.1f}%")
+            
+            return reconciliation_result
+            
+        except Exception as e:
+            error_msg = f"Error applying Phase 3 to main data: {str(e)}"
+            print(f"❌ {error_msg}")
+            import traceback
+            traceback.print_exc()
+            
+            # Return original result if Phase 3 application fails
+            return reconciliation_result
+    
+    # Phase 3 Operations
+    def process_phase3_reconciliation(self) -> Dict[str, Any]:
+        """
+        Execute Phase 3 reconciliation with narration splitting and 
+        separate debit/credit loan ID extraction
+        
+        Returns:
+            Dictionary containing debit/credit DataFrames, pivot tables, and summary
+        """
+        print("🚀 Starting Phase 3: Advanced Bank Ledger Reconciliation...")
+        
+        try:
+            # Process bank ledger with Phase 3 logic
+            phase3_result = self.phase3_processor.process_bank_ledger_phase3(self.bank_ledger_df)
+            
+            if phase3_result['status'] == 'success':
+                # Display summary
+                summary_text = self.phase3_processor.get_phase3_summary(phase3_result)
+                print(summary_text)
+            
+            return phase3_result
+            
+        except Exception as e:
+            error_msg = f"Error in Phase 3 reconciliation: {str(e)}"
+            print(f"❌ {error_msg}")
+            return {
+                'status': 'error',
+                'message': error_msg,
+                'debit_df': pd.DataFrame(),
+                'credit_df': pd.DataFrame(),
+                'debit_pivot': pd.DataFrame(),
+                'credit_pivot': pd.DataFrame(),
+                'processing_summary': {}
+            }
+    
+    def get_phase3_debit_data(self) -> pd.DataFrame:
+        """Get Phase 3 debit transactions DataFrame"""
+        result = self.process_phase3_reconciliation()
+        return result.get('debit_df', pd.DataFrame())
+    
+    def get_phase3_credit_data(self) -> pd.DataFrame:
+        """Get Phase 3 credit transactions DataFrame"""
+        result = self.process_phase3_reconciliation()
+        return result.get('credit_df', pd.DataFrame())
+    
+    def get_phase3_debit_pivot(self) -> pd.DataFrame:
+        """Get Phase 3 debit pivot table (loan_id grouped with sum)"""
+        result = self.process_phase3_reconciliation()
+        return result.get('debit_pivot', pd.DataFrame())
+    
+    def get_phase3_credit_pivot(self) -> pd.DataFrame:
+        """Get Phase 3 credit pivot table (loan_id grouped with sum)"""
+        result = self.process_phase3_reconciliation()
+        return result.get('credit_pivot', pd.DataFrame())
     
     # Export Operations
     def export_reconciliation_to_excel(self, output_filename: str = None, output_dir: str = None) -> str:
@@ -740,6 +960,132 @@ class ModularReconciliationEngine:
             result['debug_info']['error_message'] = f"Export process failed: {str(e)}"
             
         return result
+    
+    # Phase 3 Reconciliation Methods
+    def process_phase3_bank_ledger(self) -> Dict[str, Any]:
+        """Process bank ledger data using Phase 3 methodology"""
+        try:
+            from .processors.phase3_processor import Phase3ReconciliationProcessor
+            
+            processor = Phase3ReconciliationProcessor()
+            return processor.process_bank_ledger_phase3(self.bank_ledger_df)
+            
+        except Exception as e:
+            error_msg = f"Error in Phase 3 bank ledger processing: {str(e)}"
+            print(f"❌ {error_msg}")
+            return {
+                'status': 'error',
+                'message': error_msg,
+                'debit_df': pd.DataFrame(),
+                'credit_df': pd.DataFrame()
+            }
+    
+    def process_phase3_reconciliation(self, mismatched_data: pd.DataFrame = None) -> Dict[str, Any]:
+        """
+        Phase 3 Reconciliation: Analyze credit/debit differences and match with QR amounts
+        
+        Args:
+            mismatched_data: DataFrame of mismatched records from Phase 2, if None will extract from current reconciliation
+            
+        Returns:
+            Dict containing newly matched records, remaining mismatches, and analysis
+        """
+        print("🔄 Starting Phase 3: Credit/Debit Reconciliation...")
+        
+        try:
+            from .processors.phase3_processor import Phase3ReconciliationProcessor
+            
+            # Get mismatched data if not provided
+            if mismatched_data is None:
+                print("   • Extracting mismatched data from current reconciliation...")
+                reconciliation_result = self.merge_pivot_tables_comparison(include_stage2=True)
+                
+                if reconciliation_result.get('status') != 'success':
+                    return {
+                        'newly_matched': pd.DataFrame(),
+                        'remaining_mismatched': pd.DataFrame(),
+                        'phase3_analysis': {'total_analyzed': 0, 'resolved': 0},
+                        'status': 'error',
+                        'message': 'Could not get reconciliation data for Phase 3 processing'
+                    }
+                
+                main_data = reconciliation_result.get('merged_pivot_data')
+                if main_data is None or main_data.empty:
+                    return {
+                        'newly_matched': pd.DataFrame(),
+                        'remaining_mismatched': pd.DataFrame(),
+                        'phase3_analysis': {'total_analyzed': 0, 'resolved': 0},
+                        'status': 'success',
+                        'message': 'No data available for Phase 3 processing',
+                    }
+                
+                # Extract mismatched records
+                status_col = 'status' if 'status' in main_data.columns else 'reconciliation_status'
+                mismatched_data = main_data[
+                    main_data[status_col].str.contains('MISMATCH', na=False)
+                ].copy()
+            
+            print(f"   • Found {len(mismatched_data)} mismatched records for Phase 3 analysis")
+            
+            if mismatched_data.empty:
+                return {
+                    'newly_matched': pd.DataFrame(),
+                    'remaining_mismatched': pd.DataFrame(),
+                    'phase3_analysis': {'total_analyzed': 0, 'resolved': 0},
+                    'status': 'success',
+                    'message': 'No mismatched records found for Phase 3 processing'
+                }
+            
+            # Process bank ledger to get credit/debit DataFrames
+            print("   • Processing bank ledger for credit/debit analysis...")
+            phase3_result = self.process_phase3_bank_ledger()
+            
+            if phase3_result.get('status') != 'success':
+                return {
+                    'newly_matched': pd.DataFrame(),
+                    'remaining_mismatched': mismatched_data.copy(),
+                    'phase3_analysis': {'total_analyzed': 0, 'resolved': 0},
+                    'status': 'error',
+                    'message': f'Phase 3 bank ledger processing failed: {phase3_result.get("message", "Unknown error")}'
+                }
+            
+            # Get debit and credit DataFrames
+            debit_df = phase3_result.get('debit_df', pd.DataFrame())
+            credit_df = phase3_result.get('credit_df', pd.DataFrame())
+            
+            if debit_df.empty and credit_df.empty:
+                return {
+                    'newly_matched': pd.DataFrame(),
+                    'remaining_mismatched': mismatched_data.copy(),
+                    'phase3_analysis': {'total_analyzed': 0, 'resolved': 0},
+                    'status': 'error',
+                    'message': 'No credit/debit data extracted from bank ledger'
+                }
+            
+            # Process Phase 3 reconciliation
+            processor = Phase3ReconciliationProcessor()
+            result = processor.process_phase3_reconciliation(mismatched_data, debit_df, credit_df)
+            
+            # Generate summary
+            if result.get('status') == 'success':
+                summary = processor.get_phase3_reconciliation_summary(result)
+                print(summary)
+            
+            return result
+            
+        except Exception as e:
+            error_msg = f"Error in Phase 3 reconciliation processing: {str(e)}"
+            print(f"❌ {error_msg}")
+            import traceback
+            traceback.print_exc()
+            
+            return {
+                'newly_matched': pd.DataFrame(),
+                'remaining_mismatched': mismatched_data.copy() if mismatched_data is not None else pd.DataFrame(),
+                'phase3_analysis': {'total_analyzed': 0, 'resolved': 0},
+                'status': 'error',
+                'message': error_msg
+            }
 
 
 # Backward compatibility - create alias to original engine name
