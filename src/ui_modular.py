@@ -1054,89 +1054,100 @@ class BankReconciliationUI:
             error_label.pack(pady=5)
     
     def _export_simple_results(self, results):
-        """Export simplified reconciliation results to Excel"""
+        """Export enhanced reconciliation results to Excel with professional formatting"""
         try:
             # Get file path
             file_path = filedialog.asksaveasfilename(
                 defaultextension=".xlsx",
                 filetypes=[("Excel files", "*.xlsx"), ("All files", "*.*")],
-                title="Save Simplified Reconciliation Report"
+                title="Save Enhanced Reconciliation Report"
             )
             
             if not file_path:
                 return
             
+            print(f"🔄 Exporting enhanced reconciliation report...")
             print(f"DEBUG: Export called with results keys: {list(results.keys()) if results else 'None'}")
             
-            # Get the main reconciliation data
+            # Use the enhanced export method
+            from utils.excel_exporter import ExcelExporter
+            
+            exporter = ExcelExporter()
+            exported_path = exporter.export_enhanced_simplified_report(results, file_path)
+            
+            # Success message with details
             main_data = None
             if results:
-                # Try multiple possible keys for the main data
                 for key in ['simplified_report', 'merged_pivot_data', 'comparison_data', 'final_data']:
                     if key in results and results[key] is not None:
                         main_data = results[key]
-                        print(f"DEBUG: Using data from key '{key}', shape: {main_data.shape if hasattr(main_data, 'shape') else 'unknown'}")
                         break
             
             summary = results.get('reconciliation_summary', {}) if results else {}
             
-            # Check if we have any data to export
-            if main_data is None:
-                messagebox.showwarning("Warning", "No reconciliation data available to export")
-                return
-                
-            with pd.ExcelWriter(file_path, engine='openpyxl') as writer:
-                # Export main data
-                if hasattr(main_data, 'empty') and not main_data.empty:
-                    # Find status column
-                    status_column = None
-                    for col in ['status', 'reconciliation_status']:
-                        if col in main_data.columns:
-                            status_column = col
-                            break
-                    
-                    if status_column:
-                        # Separate by status
-                        matched_df = main_data[main_data[status_column].str.contains('MATCHED', na=False)]
-                        mismatch_df = main_data[main_data[status_column].str.contains('MISMATCH', na=False)]
-                        
-                        # Export each category
-                        if not matched_df.empty:
-                            matched_df.to_excel(writer, sheet_name='Matched_Records', index=False)
-                        if not mismatch_df.empty:
-                            mismatch_df.to_excel(writer, sheet_name='Mismatched_Records', index=False)
-                    else:
-                        # Export all data as single sheet
-                        main_data.to_excel(writer, sheet_name='All_Records', index=False)
-                else:
-                    # Convert to DataFrame if needed
-                    if hasattr(main_data, 'to_dict'):
-                        pd.DataFrame([main_data.to_dict()]).to_excel(writer, sheet_name='Data', index=False)
-                    else:
-                        pd.DataFrame([{'Message': 'No data available'}]).to_excel(writer, sheet_name='Data', index=False)
-                
-                # Create a summary sheet
-                summary_data = {
-                    'Metric': ['Total Records', 'Perfect Matches', 'Minor Matches', 'Total Matches', 'Amount Mismatches', 'Match Rate %'],
-                    'Value': [
-                        summary.get('total_unique_loans', 0),
-                        summary.get('perfect_matches', 0),
-                        summary.get('minor_matches', 0),
-                        summary.get('total_matches', 0),
-                        summary.get('amount_mismatches', 0),
-                        f"{summary.get('match_percentage', 0):.1f}%"
-                    ]
-                }
-                summary_df = pd.DataFrame(summary_data)
-                summary_df.to_excel(writer, sheet_name='Summary', index=False)
+            total_records = summary.get('total_unique_loans', len(main_data) if main_data is not None else 0)
+            total_matches = summary.get('total_matches', 0)
+            match_rate = summary.get('match_percentage', 0)
             
-            messagebox.showinfo("Success", f"Results exported to {file_path}")
-            print(f"✅ Export successful: {file_path}")
+            success_msg = "📊 Enhanced Reconciliation Report Exported Successfully!\n\n"
+            success_msg += f"📋 Report Summary:\n"
+            success_msg += f"   • Total Records: {total_records:,}\n"
+            success_msg += f"   • Matched Records: {total_matches:,}\n"
+            success_msg += f"   • Match Rate: {match_rate:.2f}%\n\n"
+            success_msg += f"✨ Enhanced Features:\n"
+            success_msg += f"   • Professional formatting with colors\n"
+            success_msg += f"   • Auto-filters on all data sheets\n"
+            success_msg += f"   • Conditional formatting for status\n"
+            success_msg += f"   • Currency formatting for amounts\n"
+            success_msg += f"   • Executive summary dashboard\n"
+            success_msg += f"   • Separate sheets by record type\n\n"
+            success_msg += f"📁 File: {exported_path}"
+            
+            messagebox.showinfo("Export Successful", success_msg)
             
         except Exception as e:
-            error_msg = f"Error exporting results: {str(e)}"
-            logging.error(error_msg, exc_info=True)
-            messagebox.showerror("Export Error", error_msg)
+            print(f"❌ Enhanced export failed: {str(e)}")
+            # Fallback to simple export
+            try:
+                self._export_simple_results_fallback(results, file_path)
+            except Exception as fallback_error:
+                error_msg = f"Export failed: {str(e)}\nFallback also failed: {str(fallback_error)}"
+                messagebox.showerror("Export Error", error_msg)
+    
+    def _export_simple_results_fallback(self, results, file_path):
+        """Fallback simple export method"""
+        with pd.ExcelWriter(file_path, engine='openpyxl') as writer:
+            # Get the main reconciliation data
+            main_data = None
+            if results:
+                for key in ['simplified_report', 'merged_pivot_data', 'comparison_data', 'final_data']:
+                    if key in results and results[key] is not None:
+                        main_data = results[key]
+                        break
+            
+            if main_data is not None and hasattr(main_data, 'empty') and not main_data.empty:
+                main_data.to_excel(writer, sheet_name='All_Records', index=False)
+            else:
+                pd.DataFrame([{'Message': 'No data available'}]).to_excel(writer, sheet_name='Data', index=False)
+            
+            # Create summary
+            summary = results.get('reconciliation_summary', {}) if results else {}
+            summary_data = {
+                'Metric': ['Total Records', 'Perfect Matches', 'Minor Matches', 'Total Matches', 'Amount Mismatches', 'Match Rate %'],
+                'Value': [
+                    summary.get('total_unique_loans', 0),
+                    summary.get('perfect_matches', 0),
+                    summary.get('minor_matches', 0),
+                    summary.get('total_matches', 0),
+                    summary.get('amount_mismatches', 0),
+                    f"{summary.get('match_percentage', 0):.1f}%"
+                ]
+            }
+            summary_df = pd.DataFrame(summary_data)
+            summary_df.to_excel(writer, sheet_name='Summary', index=False)
+        
+        messagebox.showinfo("Success", f"Results exported to {file_path}")
+        print(f"✅ Fallback export successful: {file_path}")
     
     def _display_reconciliation_results(self, parent, summary, recon_engine=None):
         """Display reconciliation results"""

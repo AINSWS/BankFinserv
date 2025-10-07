@@ -402,29 +402,40 @@ class ExcelExporter:
             df.to_excel(writer, sheet_name='Bank-Demand Matches', index=False)
     
     def _apply_advanced_formatting(self, filepath: str):
-        """Apply advanced formatting to the exported Excel file"""
+        """Apply advanced formatting to the exported Excel file with filters and professional styling"""
         try:
             workbook = openpyxl.load_workbook(filepath)
             
             for sheet_name in workbook.sheetnames:
                 worksheet = workbook[sheet_name]
                 
-                # Auto-adjust column widths
+                if worksheet.max_row == 0:
+                    continue
+                
+                # Add AutoFilter to all data sheets
+                if worksheet.max_row > 1:
+                    max_col_letter = openpyxl.utils.get_column_letter(worksheet.max_column)
+                    worksheet.auto_filter.ref = f"A1:{max_col_letter}{worksheet.max_row}"
+                
+                # Auto-adjust column widths with minimum and maximum limits
                 for column in worksheet.columns:
                     max_length = 0
                     column_letter = column[0].column_letter
                     
                     for cell in column:
                         try:
-                            if len(str(cell.value)) > max_length:
-                                max_length = len(str(cell.value))
+                            if cell.value is not None:
+                                cell_length = len(str(cell.value))
+                                if cell_length > max_length:
+                                    max_length = cell_length
                         except:
                             pass
                     
-                    adjusted_width = min(max_length + 2, 50)
+                    # Set width with smart sizing
+                    adjusted_width = max(8, min(max_length + 3, 50))  # Min 8, Max 50
                     worksheet.column_dimensions[column_letter].width = adjusted_width
                 
-                # Apply header formatting
+                # Apply enhanced header formatting
                 if worksheet.max_row > 0:
                     for cell in worksheet[1]:
                         if cell.value:
@@ -433,18 +444,104 @@ class ExcelExporter:
                             cell.alignment = self.default_styles['header']['alignment']
                             cell.border = self.default_styles['header']['border']
                 
-                # Apply data formatting
-                for row in worksheet.iter_rows(min_row=2, max_row=worksheet.max_row):
-                    for cell in row:
+                # Apply zebra striping (alternating row colors)
+                for row_num in range(2, worksheet.max_row + 1):
+                    fill_color = 'F8F9FA' if row_num % 2 == 0 else 'FFFFFF'
+                    for cell in worksheet[row_num]:
                         if cell.value is not None:
                             cell.border = self.default_styles['data']['border']
                             cell.alignment = self.default_styles['data']['alignment']
                             cell.font = self.default_styles['data']['font']
+                            if row_num % 2 == 0:
+                                cell.fill = PatternFill(start_color=fill_color, end_color=fill_color, fill_type='solid')
+                
+                # Apply conditional formatting for status columns
+                self._apply_status_conditional_formatting(worksheet)
+                
+                # Apply number formatting for amount columns
+                self._apply_number_formatting(worksheet)
+                
+                # Freeze panes (freeze first row and first column)
+                if worksheet.max_row > 1:
+                    worksheet.freeze_panes = 'B2'
             
             workbook.save(filepath)
             
         except Exception as e:
+            print(f"⚠️  Could not apply advanced formatting: {str(e)}")
             self.logger.warning(f"Could not apply advanced formatting: {str(e)}")
+    
+    def _apply_status_conditional_formatting(self, worksheet):
+        """Apply conditional formatting for status columns"""
+        try:
+            # Find status columns
+            status_columns = []
+            for col_idx, cell in enumerate(worksheet[1], 1):
+                if cell.value and 'status' in str(cell.value).lower():
+                    status_columns.append(col_idx)
+            
+            for col_idx in status_columns:
+                col_letter = openpyxl.utils.get_column_letter(col_idx)
+                range_str = f"{col_letter}2:{col_letter}{worksheet.max_row}"
+                
+                # Green for MATCHED
+                matched_rule = CellIsRule(
+                    operator='containsText', 
+                    formula=['"MATCHED"'],
+                    fill=PatternFill(start_color='C6EFCE', end_color='C6EFCE', fill_type='solid'),
+                    font=Font(color='006100', bold=True)
+                )
+                worksheet.conditional_formatting.add(range_str, matched_rule)
+                
+                # Red for MISMATCH
+                mismatch_rule = CellIsRule(
+                    operator='containsText',
+                    formula=['"MISMATCH"'], 
+                    fill=PatternFill(start_color='FFC7CE', end_color='FFC7CE', fill_type='solid'),
+                    font=Font(color='9C0006', bold=True)
+                )
+                worksheet.conditional_formatting.add(range_str, mismatch_rule)
+                
+                # Blue for Phase 3 matches
+                phase3_rule = CellIsRule(
+                    operator='containsText',
+                    formula=['"Phase 3"'],
+                    fill=PatternFill(start_color='CCEEFF', end_color='CCEEFF', fill_type='solid'),
+                    font=Font(color='0066CC', bold=True)
+                )
+                worksheet.conditional_formatting.add(range_str, phase3_rule)
+                
+                # Orange for Group Payment matches
+                group_rule = CellIsRule(
+                    operator='containsText',
+                    formula=['"Group Payment"'],
+                    fill=PatternFill(start_color='FFE6CC', end_color='FFE6CC', fill_type='solid'),
+                    font=Font(color='CC6600', bold=True)
+                )
+                worksheet.conditional_formatting.add(range_str, group_rule)
+                
+        except Exception as e:
+            print(f"⚠️  Could not apply status conditional formatting: {str(e)}")
+    
+    def _apply_number_formatting(self, worksheet):
+        """Apply number formatting for amount columns"""
+        try:
+            # Find amount columns
+            amount_columns = []
+            for col_idx, cell in enumerate(worksheet[1], 1):
+                if cell.value and any(keyword in str(cell.value).lower() for keyword in ['amount', 'total', 'balance', 'difference']):
+                    amount_columns.append(col_idx)
+            
+            # Apply currency formatting to amount columns
+            for col_idx in amount_columns:
+                col_letter = openpyxl.utils.get_column_letter(col_idx)
+                for row in range(2, worksheet.max_row + 1):
+                    cell = worksheet[f"{col_letter}{row}"]
+                    if cell.value is not None and isinstance(cell.value, (int, float)):
+                        cell.number_format = '₹#,##0.00'
+                        
+        except Exception as e:
+            print(f"⚠️  Could not apply number formatting: {str(e)}")
     
     def export_dataframe(self, df: pd.DataFrame, filename: str, sheet_name: str = 'Data', 
                         apply_formatting: bool = True) -> str:
@@ -495,6 +592,172 @@ class ExcelExporter:
         
         print(f"✅ Multiple DataFrames exported to: {filename}")
         return filepath
+    
+    def export_enhanced_simplified_report(self, results: Dict, file_path: str) -> str:
+        """
+        Export enhanced simplified reconciliation report with professional formatting
+        
+        Args:
+            results (Dict): Reconciliation results dictionary
+            file_path (str): Full path for the output file
+            
+        Returns:
+            str: Path to exported file
+        """
+        try:
+            print(f"📊 Creating enhanced reconciliation report...")
+            
+            # Get the main reconciliation data
+            main_data = None
+            if results:
+                for key in ['simplified_report', 'merged_pivot_data', 'comparison_data', 'final_data']:
+                    if key in results and results[key] is not None:
+                        main_data = results[key]
+                        print(f"   Using data from key '{key}', shape: {main_data.shape if hasattr(main_data, 'shape') else 'unknown'}")
+                        break
+            
+            summary = results.get('reconciliation_summary', {}) if results else {}
+            
+            if main_data is None:
+                raise ValueError("No reconciliation data available to export")
+            
+            with pd.ExcelWriter(file_path, engine='openpyxl') as writer:
+                
+                # Sheet 1: Executive Summary
+                self._create_executive_summary_sheet(writer, summary, main_data)
+                
+                # Sheet 2: All Records with enhanced filtering
+                if hasattr(main_data, 'empty') and not main_data.empty:
+                    # Add summary columns for better analysis
+                    enhanced_data = main_data.copy()
+                    
+                    # Add difference calculation if both amounts exist
+                    if 'system_amount' in enhanced_data.columns and 'qr_amount' in enhanced_data.columns:
+                        enhanced_data['amount_difference'] = enhanced_data['system_amount'] - enhanced_data['qr_amount']
+                        enhanced_data['abs_difference'] = enhanced_data['amount_difference'].abs()
+                    
+                    # Find status column
+                    status_column = None
+                    for col in ['status', 'reconciliation_status']:
+                        if col in enhanced_data.columns:
+                            status_column = col
+                            break
+                    
+                    # Export complete data
+                    enhanced_data.to_excel(writer, sheet_name='All_Records', index=False)
+                    print(f"   ✓ All records exported ({len(enhanced_data)} entries)")
+                    
+                    if status_column:
+                        # Sheet 3: Matched Records (all types)
+                        matched_df = enhanced_data[enhanced_data[status_column].str.contains('MATCHED', na=False)]
+                        if not matched_df.empty:
+                            matched_df.to_excel(writer, sheet_name='Matched_Records', index=False)
+                            print(f"   ✓ Matched records exported ({len(matched_df)} entries)")
+                        
+                        # Sheet 4: Bank Only Records (no QR data)
+                        bank_only_df = enhanced_data[
+                            (enhanced_data['qr_amount'].isna() | (enhanced_data['qr_amount'] == 0)) & 
+                            (enhanced_data['system_amount'] > 0)
+                        ]
+                        if not bank_only_df.empty:
+                            bank_only_df.to_excel(writer, sheet_name='Bank_Only_Records', index=False)
+                            print(f"   ✓ Bank only records exported ({len(bank_only_df)} entries)")
+                        
+                        # Sheet 5: QR Only Records (no bank data)
+                        qr_only_df = enhanced_data[
+                            (enhanced_data['system_amount'].isna() | (enhanced_data['system_amount'] == 0)) & 
+                            (enhanced_data['qr_amount'] > 0)
+                        ]
+                        if not qr_only_df.empty:
+                            qr_only_df.to_excel(writer, sheet_name='QR_Only_Records', index=False)
+                            print(f"   ✓ QR only records exported ({len(qr_only_df)} entries)")
+                        
+                        # Sheet 6: Unresolved Mismatches
+                        mismatch_df = enhanced_data[enhanced_data[status_column].str.contains('MISMATCH', na=False)]
+                        if not mismatch_df.empty:
+                            # Sort by absolute difference (highest first)
+                            if 'abs_difference' in mismatch_df.columns:
+                                mismatch_df = mismatch_df.sort_values('abs_difference', ascending=False)
+                            mismatch_df.to_excel(writer, sheet_name='Unresolved_Mismatches', index=False)
+                            print(f"   ✓ Unresolved mismatches exported ({len(mismatch_df)} entries)")
+            
+            # Apply enhanced formatting
+            self._apply_advanced_formatting(file_path)
+            
+            print(f"✅ Enhanced reconciliation report exported successfully!")
+            print(f"📁 File: {file_path}")
+            
+            return file_path
+            
+        except Exception as e:
+            print(f"❌ Export failed: {str(e)}")
+            raise
+    
+    def _create_executive_summary_sheet(self, writer: pd.ExcelWriter, summary: Dict, main_data: pd.DataFrame):
+        """Create an executive summary sheet with key metrics and charts"""
+        try:
+            # Create summary data
+            summary_items = []
+            
+            # Basic metrics
+            total_records = summary.get('total_unique_loans', len(main_data) if main_data is not None else 0)
+            perfect_matches = summary.get('perfect_matches', 0)
+            minor_matches = summary.get('minor_matches', 0)
+            total_matches = summary.get('total_matches', perfect_matches + minor_matches)
+            mismatches = summary.get('amount_mismatches', total_records - total_matches)
+            match_rate = summary.get('match_percentage', (total_matches / total_records * 100) if total_records > 0 else 0)
+            
+            summary_items.extend([
+                ['📊 RECONCILIATION OVERVIEW', ''],
+                ['Total Loan Records', f'{total_records:,}'],
+                ['Perfect Matches', f'{perfect_matches:,}'],
+                ['Minor Matches (±3 tolerance)', f'{minor_matches:,}'],
+                ['Total Matched Records', f'{total_matches:,}'],
+                ['Unresolved Mismatches', f'{mismatches:,}'],
+                ['Overall Match Rate', f'{match_rate:.2f}%'],
+                ['', ''],
+                ['💰 AMOUNT ANALYSIS', ''],
+                ['Total System Amount', f"₹{summary.get('total_system_amount', 0):,.2f}"],
+                ['Total QR Amount', f"₹{summary.get('total_qr_amount', 0):,.2f}"],
+                ['Net Difference', f"₹{summary.get('net_difference', 0):,.2f}"],
+                ['', '']
+            ])
+            
+            # Add reconciliation method breakdown if available
+            if main_data is not None and 'status' in main_data.columns:
+                method_counts = main_data['status'].value_counts()
+                summary_items.append(['🔧 RECONCILIATION METHODS', ''])
+                for method, count in method_counts.items():
+                    summary_items.append([method, f'{count:,}'])
+                summary_items.append(['', ''])
+            
+            # Add phase-specific analysis
+            if main_data is not None and 'status' in main_data.columns:
+                phase3_matches = len(main_data[main_data['status'].str.contains('Phase 3', na=False)])
+                group_matches = len(main_data[main_data['status'].str.contains('Group Payment', na=False)])
+                
+                summary_items.extend([
+                    ['📈 ADVANCED RECONCILIATION', ''],
+                    ['Phase 3 (Credit/Debit) Matches', f'{phase3_matches:,}'],
+                    ['Stage 2 (Group Payment) Matches', f'{group_matches:,}'],
+                    ['Standard Matches', f'{perfect_matches + minor_matches - phase3_matches - group_matches:,}']
+                ])
+            
+            # Convert to DataFrame
+            summary_df = pd.DataFrame(summary_items, columns=['Metric', 'Value'])
+            summary_df.to_excel(writer, sheet_name='Summary', index=False)
+            
+            print(f"   ✓ Executive summary created")
+            
+        except Exception as e:
+            print(f"   ⚠️  Could not create executive summary: {str(e)}")
+            # Create basic summary as fallback
+            basic_summary = pd.DataFrame([
+                ['Total Records', total_records],
+                ['Matched Records', total_matches],
+                ['Match Rate', f"{match_rate:.2f}%"]
+            ], columns=['Metric', 'Value'])
+            basic_summary.to_excel(writer, sheet_name='Summary', index=False)
     
     def create_template_file(self, template_type: str = 'reconciliation') -> str:
         """
