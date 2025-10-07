@@ -598,19 +598,172 @@ class ExcelExporter:
                 cell.font = Font(bold=True, size=10, color="FFFFFF")
                 cell.fill = PatternFill(start_color="C5504B", end_color="C5504B", fill_type="solid")
                 cell.alignment = Alignment(horizontal="center", vertical="center")
+    
+    def export_enhanced_simplified_report(self, results: Dict, file_path: str) -> str:
+        """
+        Export enhanced simplified reconciliation report with professional formatting
         
-        # Highlight high differences
-        if worksheet.max_row > 1:
-            for col_idx, cell in enumerate(worksheet[1], 1):
-                if cell.value and 'amount_difference' in str(cell.value).lower():
-                    col_letter = openpyxl.utils.get_column_letter(col_idx)
+        Args:
+            results (Dict): Reconciliation results dictionary
+            file_path (str): Full path for the output file
+            
+        Returns:
+            str: Path to exported file
+        """
+        try:
+            print(f"📊 Creating enhanced reconciliation report...")
+            
+            # Get the main reconciliation data
+            main_data = None
+            if results:
+                for key in ['simplified_report', 'merged_pivot_data', 'comparison_data', 'final_data']:
+                    if key in results and results[key] is not None:
+                        main_data = results[key]
+                        print(f"   Using data from key '{key}', shape: {main_data.shape if hasattr(main_data, 'shape') else 'unknown'}")
+                        break
+            
+            summary = results.get('reconciliation_summary', {}) if results else {}
+            
+            if main_data is None:
+                raise ValueError("No reconciliation data available to export")
+            
+            with pd.ExcelWriter(file_path, engine='openpyxl') as writer:
+                
+                # Sheet 1: Executive Summary
+                self._create_executive_summary_sheet(writer, summary, main_data)
+                
+                # Sheet 2: All Records with enhanced filtering
+                if hasattr(main_data, 'empty') and not main_data.empty:
+                    # Add summary columns for better analysis
+                    enhanced_data = main_data.copy()
                     
-                    for row in range(2, worksheet.max_row + 1):
-                        cell = worksheet[f"{col_letter}{row}"]
-                        if cell.value and isinstance(cell.value, (int, float)):
-                            if abs(cell.value) > 10:
-                                cell.fill = PatternFill(start_color="FFB3BA", end_color="FFB3BA", fill_type="solid")
-                    break
+                    # Add difference calculation if both amounts exist
+                    if 'system_amount' in enhanced_data.columns and 'qr_amount' in enhanced_data.columns:
+                        enhanced_data['amount_difference'] = enhanced_data['system_amount'] - enhanced_data['qr_amount']
+                        enhanced_data['abs_difference'] = enhanced_data['amount_difference'].abs()
+                    
+                    # Find status column
+                    status_column = None
+                    for col in ['status', 'reconciliation_status']:
+                        if col in enhanced_data.columns:
+                            status_column = col
+                            break
+                    
+                    # Export complete data
+                    enhanced_data.to_excel(writer, sheet_name='All_Records', index=False)
+                    print(f"   ✓ All records exported ({len(enhanced_data)} entries)")
+                    
+                    if status_column:
+                        # Sheet 3: Matched Records (all types)
+                        matched_df = enhanced_data[enhanced_data[status_column].str.contains('MATCHED', na=False)]
+                        if not matched_df.empty:
+                            matched_df.to_excel(writer, sheet_name='Matched_Records', index=False)
+                            print(f"   ✓ Matched records exported ({len(matched_df)} entries)")
+                        
+                        # Sheet 4: Bank Only Records (no QR data)
+                        bank_only_df = enhanced_data[
+                            (enhanced_data['qr_amount'].isna() | (enhanced_data['qr_amount'] == 0)) & 
+                            (enhanced_data['system_amount'] > 0)
+                        ]
+                        if not bank_only_df.empty:
+                            bank_only_df.to_excel(writer, sheet_name='Bank_Only_Records', index=False)
+                            print(f"   ✓ Bank only records exported ({len(bank_only_df)} entries)")
+                        
+                        # Sheet 5: QR Only Records (no bank data)
+                        qr_only_df = enhanced_data[
+                            (enhanced_data['system_amount'].isna() | (enhanced_data['system_amount'] == 0)) & 
+                            (enhanced_data['qr_amount'] > 0)
+                        ]
+                        if not qr_only_df.empty:
+                            qr_only_df.to_excel(writer, sheet_name='QR_Only_Records', index=False)
+                            print(f"   ✓ QR only records exported ({len(qr_only_df)} entries)")
+                        
+                        # Sheet 6: Unresolved Mismatches
+                        mismatch_df = enhanced_data[enhanced_data[status_column].str.contains('MISMATCH', na=False)]
+                        if not mismatch_df.empty:
+                            # Sort by absolute difference (highest first)
+                            if 'abs_difference' in mismatch_df.columns:
+                                mismatch_df = mismatch_df.sort_values('abs_difference', ascending=False)
+                            mismatch_df.to_excel(writer, sheet_name='Unresolved_Mismatches', index=False)
+                            print(f"   ✓ Unresolved mismatches exported ({len(mismatch_df)} entries)")
+            
+            # Apply enhanced formatting
+            self._apply_advanced_formatting(file_path)
+            
+            print(f"✅ Enhanced reconciliation report exported successfully!")
+            print(f"📁 File: {file_path}")
+            
+            return file_path
+            
+        except Exception as e:
+            print(f"❌ Export failed: {str(e)}")
+            raise
+    
+    def _create_executive_summary_sheet(self, writer: pd.ExcelWriter, summary: Dict, main_data: pd.DataFrame):
+        """Create an executive summary sheet with key metrics and charts"""
+        try:
+            # Create summary data
+            summary_items = []
+            
+            # Basic metrics
+            total_records = summary.get('total_unique_loans', len(main_data) if main_data is not None else 0)
+            perfect_matches = summary.get('perfect_matches', 0)
+            minor_matches = summary.get('minor_matches', 0)
+            total_matches = summary.get('total_matches', perfect_matches + minor_matches)
+            mismatches = summary.get('amount_mismatches', total_records - total_matches)
+            match_rate = summary.get('match_percentage', (total_matches / total_records * 100) if total_records > 0 else 0)
+            
+            summary_items.extend([
+                ['📊 RECONCILIATION OVERVIEW', ''],
+                ['Total Loan Records', f'{total_records:,}'],
+                ['Perfect Matches', f'{perfect_matches:,}'],
+                ['Minor Matches (±3 tolerance)', f'{minor_matches:,}'],
+                ['Total Matched Records', f'{total_matches:,}'],
+                ['Unresolved Mismatches', f'{mismatches:,}'],
+                ['Overall Match Rate', f'{match_rate:.2f}%'],
+                ['', ''],
+                ['💰 AMOUNT ANALYSIS', ''],
+                ['Total System Amount', f"₹{summary.get('total_system_amount', 0):,.2f}"],
+                ['Total QR Amount', f"₹{summary.get('total_qr_amount', 0):,.2f}"],
+                ['Net Difference', f"₹{summary.get('net_difference', 0):,.2f}"],
+                ['', '']
+            ])
+            
+            # Add reconciliation method breakdown if available
+            if main_data is not None and 'status' in main_data.columns:
+                method_counts = main_data['status'].value_counts()
+                summary_items.append(['🔧 RECONCILIATION METHODS', ''])
+                for method, count in method_counts.items():
+                    summary_items.append([method, f'{count:,}'])
+                summary_items.append(['', ''])
+            
+            # Add phase-specific analysis
+            if main_data is not None and 'status' in main_data.columns:
+                phase3_matches = len(main_data[main_data['status'].str.contains('Phase 3', na=False)])
+                group_matches = len(main_data[main_data['status'].str.contains('Group Payment', na=False)])
+                
+                summary_items.extend([
+                    ['📈 ADVANCED RECONCILIATION', ''],
+                    ['Phase 3 (Credit/Debit) Matches', f'{phase3_matches:,}'],
+                    ['Stage 2 (Group Payment) Matches', f'{group_matches:,}'],
+                    ['Standard Matches', f'{perfect_matches + minor_matches - phase3_matches - group_matches:,}']
+                ])
+            
+            # Convert to DataFrame
+            summary_df = pd.DataFrame(summary_items, columns=['Metric', 'Value'])
+            summary_df.to_excel(writer, sheet_name='Summary', index=False)
+            
+            print(f"   ✓ Executive summary created")
+            
+        except Exception as e:
+            print(f"   ⚠️  Could not create executive summary: {str(e)}")
+            # Create basic summary as fallback
+            basic_summary = pd.DataFrame([
+                ['Total Records', total_records],
+                ['Matched Records', total_matches],
+                ['Match Rate', f"{match_rate:.2f}%"]
+            ], columns=['Metric', 'Value'])
+            basic_summary.to_excel(writer, sheet_name='Summary', index=False)
     
     def _apply_basic_formatting(self, worksheet):
         """Apply basic formatting to any sheet"""

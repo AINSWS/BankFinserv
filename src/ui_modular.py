@@ -11,6 +11,15 @@ import os
 import pandas as pd
 import logging
 
+# Import openpyxl for Excel formatting
+try:
+    from openpyxl import load_workbook
+    from openpyxl.styles import PatternFill, Font
+    OPENPYXL_AVAILABLE = True
+except ImportError:
+    OPENPYXL_AVAILABLE = False
+    print("⚠️ Warning: openpyxl not available - Excel formatting will be limited")
+
 # Add src directory to path for imports
 sys.path.append(os.path.join(os.path.dirname(__file__)))
 sys.path.append(os.path.join(os.path.dirname(__file__), 'reconciliation'))
@@ -1130,13 +1139,158 @@ class BankReconciliationUI:
                 summary_df = pd.DataFrame(summary_data)
                 summary_df.to_excel(writer, sheet_name='Summary', index=False)
             
-            messagebox.showinfo("Success", f"Results exported to {file_path}")
+            # Apply clean formatting to make filters and colors visible
+            print(f"🎨 Applying clean formatting to: {file_path}")
+            self._apply_clean_formatting(file_path)
+            
+            # Show success message with details
+            total_records = summary.get('total_unique_loans', len(main_data) if main_data is not None else 0)
+            total_matches = summary.get('total_matches', 0)
+            match_rate = summary.get('match_percentage', 0)
+            
+            success_msg = f"📊 Reconciliation Report Exported Successfully!\n\n"
+            success_msg += f"📋 Summary:\n"
+            success_msg += f"   • Total Records: {total_records:,}\n"
+            success_msg += f"   • Matched Records: {total_matches:,}\n"
+            success_msg += f"   • Match Rate: {match_rate:.2f}%\n\n"
+            success_msg += f"✨ Features:\n"
+            success_msg += f"   • Separate sheets for matched/mismatched\n"
+            success_msg += f"   • Auto-filters enabled\n"
+            success_msg += f"   • Basic color coding\n\n"
+            success_msg += f"📁 File: {file_path}"
+            
+            messagebox.showinfo("Export Successful", success_msg)
             print(f"✅ Export successful: {file_path}")
             
         except Exception as e:
             error_msg = f"Error exporting results: {str(e)}"
             logging.error(error_msg, exc_info=True)
             messagebox.showerror("Export Error", error_msg)
+    
+    def _apply_clean_formatting(self, file_path):
+        """Apply clean, visible formatting to Excel file"""
+        if not OPENPYXL_AVAILABLE:
+            print("⚠️ Skipping formatting - openpyxl not available")
+            return
+            
+        try:
+            print(f"🔧 Starting formatting for: {file_path}")
+            
+            # Load the workbook
+            print(f"📂 Loading workbook...")
+            wb = load_workbook(file_path)
+            print(f"📋 Sheets found: {wb.sheetnames}")
+            
+            # Define clean colors
+            matched_fill = PatternFill(start_color="C6EFCE", end_color="C6EFCE", fill_type="solid")  # Light green
+            mismatch_fill = PatternFill(start_color="FFC7CE", end_color="FFC7CE", fill_type="solid")  # Light red
+            header_fill = PatternFill(start_color="D3D3D3", end_color="D3D3D3", fill_type="solid")   # Light gray
+            header_font = Font(bold=True)
+            
+            for sheet_name in wb.sheetnames:
+                print(f"🎨 Processing sheet: {sheet_name}")
+                ws = wb[sheet_name]
+                
+                # Apply auto-filter to make it visible - with safe checks
+                try:
+                    max_row = ws.max_row
+                    max_col = ws.max_column
+                    if max_row and max_row > 1 and max_col and max_col > 1:
+                        filter_ref = f"A1:{ws.cell(row=1, column=max_col).coordinate}{max_row}"
+                        ws.auto_filter.ref = filter_ref
+                        print(f"   ✅ Auto-filter applied: {filter_ref}")
+                    else:
+                        print(f"   ⚠️ Sheet {sheet_name} too small for auto-filter (rows: {max_row}, cols: {max_col})")
+                except Exception as filter_error:
+                    print(f"   ⚠️ Could not apply auto-filter to {sheet_name}: {filter_error}")
+                    continue
+                
+                # Format headers - with safe max_column check
+                try:
+                    max_col = ws.max_column
+                    if max_col and max_col > 0:
+                        for col in range(1, max_col + 1):
+                            cell = ws.cell(row=1, column=col)
+                            cell.fill = header_fill
+                            cell.font = header_font
+                        print(f"   🎨 Headers formatted (columns 1-{max_col})")
+                    else:
+                        print(f"   ⚠️ No columns found in sheet {sheet_name}")
+                except Exception as col_error:
+                    print(f"   ⚠️ Could not format headers in {sheet_name}: {col_error}")
+                    continue
+                
+                # Apply row coloring based on sheet name and status - with safe checks
+                try:
+                    max_row = ws.max_row
+                    max_col = ws.max_column
+                    
+                    if 'Matched' in sheet_name and max_row and max_col and max_row > 1:
+                        # Light green for matched records (limit rows for performance)
+                        row_limit = min(max_row + 1, 1000)
+                        for row in range(2, row_limit):
+                            for col in range(1, max_col + 1):
+                                ws.cell(row=row, column=col).fill = matched_fill
+                        print(f"   🟢 Applied green background to {row_limit-2} rows")
+                                
+                    elif 'Mismatched' in sheet_name and max_row and max_col and max_row > 1:
+                        # Light red for mismatched records (limit rows for performance)
+                        row_limit = min(max_row + 1, 1000)
+                        for row in range(2, row_limit):
+                            for col in range(1, max_col + 1):
+                                ws.cell(row=row, column=col).fill = mismatch_fill
+                        print(f"   🔴 Applied red background to {row_limit-2} rows")
+                
+                    elif 'All' in sheet_name and max_row and max_col and max_row > 1:
+                        # Apply conditional coloring based on status column
+                        status_col = None
+                        for col in range(1, max_col + 1):
+                            cell_value = ws.cell(row=1, column=col).value
+                            if cell_value and 'status' in str(cell_value).lower():
+                                status_col = col
+                                break
+                        
+                        if status_col:
+                            row_limit = min(max_row + 1, 1000)  # Performance limit
+                            for row in range(2, row_limit):
+                                status_value = ws.cell(row=row, column=status_col).value
+                                if status_value and 'MATCHED' in str(status_value):
+                                    for col in range(1, max_col + 1):
+                                        ws.cell(row=row, column=col).fill = matched_fill
+                                elif status_value and 'MISMATCH' in str(status_value):
+                                    for col in range(1, max_col + 1):
+                                        ws.cell(row=row, column=col).fill = mismatch_fill
+                            print(f"   🎨 Applied conditional coloring to {row_limit-2} rows")
+                
+                except Exception as color_error:
+                    print(f"   ⚠️ Could not apply row coloring to {sheet_name}: {color_error}")
+                
+                # Auto-adjust column widths for better visibility - with safe checks
+                try:
+                    if ws.max_column and ws.max_column > 0:
+                        for column in ws.columns:
+                            max_length = 0
+                            column_letter = column[0].column_letter
+                            for cell in column[:100]:  # Limit cells checked for performance
+                                try:
+                                    cell_value = str(cell.value) if cell.value is not None else ""
+                                    if len(cell_value) > max_length:
+                                        max_length = len(cell_value)
+                                except:
+                                    pass
+                            adjusted_width = min(max_length + 2, 30)  # Cap at 30 chars
+                            ws.column_dimensions[column_letter].width = adjusted_width
+                        print(f"   📏 Column widths auto-adjusted")
+                except Exception as width_error:
+                    print(f"   ⚠️ Could not adjust column widths in {sheet_name}: {width_error}")
+            
+            # Save the formatted workbook
+            wb.save(file_path)
+            print("✅ Clean formatting applied - filters and colors should be visible")
+            
+        except Exception as e:
+            print(f"⚠️ Warning: Could not apply formatting: {e}")
+            # Don't fail the export if formatting fails
     
     def _display_reconciliation_results(self, parent, summary, recon_engine=None):
         """Display reconciliation results"""
