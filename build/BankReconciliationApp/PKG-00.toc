@@ -1,0 +1,71 @@
+('E:\\BANK '
+ 'RECON\\BankReconsilation\\build\\BankReconciliationApp\\BankReconciliationApp.pkg',
+ {'BINARY': True,
+  'DATA': True,
+  'EXECUTABLE': True,
+  'EXTENSION': True,
+  'PYMODULE': True,
+  'PYSOURCE': True,
+  'PYZ': False,
+  'SPLASH': True,
+  'SYMLINK': False},
+ [('pyi-contents-directory _internal', '', 'OPTION'),
+  ('PYZ-00.pyz',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\build\\BankReconciliationApp\\PYZ-00.pyz',
+   'PYZ'),
+  ('struct',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\build\\BankReconciliationApp\\localpycs\\struct.pyc',
+   'PYMODULE'),
+  ('pyimod01_archive',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\build\\BankReconciliationApp\\localpycs\\pyimod01_archive.pyc',
+   'PYMODULE'),
+  ('pyimod02_importers',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\build\\BankReconciliationApp\\localpycs\\pyimod02_importers.pyc',
+   'PYMODULE'),
+  ('pyimod03_ctypes',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\build\\BankReconciliationApp\\localpycs\\pyimod03_ctypes.pyc',
+   'PYMODULE'),
+  ('pyimod04_pywin32',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\build\\BankReconciliationApp\\localpycs\\pyimod04_pywin32.pyc',
+   'PYMODULE'),
+  ('pyiboot01_bootstrap',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\PyInstaller\\loader\\pyiboot01_bootstrap.py',
+   'PYSOURCE'),
+  ('pyi_rth_inspect',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth_inspect.py',
+   'PYSOURCE'),
+  ('pyi_rth_pkgutil',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth_pkgutil.py',
+   'PYSOURCE'),
+  ('pyi_rth_multiprocessing',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth_multiprocessing.py',
+   'PYSOURCE'),
+  ('pyi_rth_setuptools',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth_setuptools.py',
+   'PYSOURCE'),
+  ('pyi_rth__tkinter',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth__tkinter.py',
+   'PYSOURCE'),
+  ('main_modular',
+   'E:\\BANK RECON\\BankReconsilation\\src\\main_modular.py',
+   'PYSOURCE')],
+ 'python312.dll',
+ True,
+ False,
+ False,
+ [],
+ None,
+ None,
+ None)

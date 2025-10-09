@@ -1,0 +1,19 @@
+UNATTI BANK RECONCILIATION TOOL
+Software License Agreement
+
+Developed by: Neuro Spark Work Solutions
+Client: Unatti Finserv
+Copyright (c) 2024 Neuro Spark Work Solutions
+
+TERMS OF USE:
+✓ Licensed for internal business use by Unatti Finserv only
+✓ Not to be distributed, copied, or modified without written permission
+✓ All intellectual property rights reserved by Neuro Spark Work Solutions
+
+SUPPORT:
+Developer: Neuro Spark Work Solutions  
+Email: vinod@neurosparkworks.com
+Version: 1.0.0
+
+This software is provided "as is" without warranty of any kind.
+© 2024 Neuro Spark Work Solutions. All rights reserved.

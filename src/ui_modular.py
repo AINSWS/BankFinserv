@@ -507,12 +507,6 @@ class BankReconciliationUI:
             # CRITICAL: Cache the results for export
             self.current_results = reconciliation_result
             
-            # Debug: Print what we got
-            print(f"DEBUG UI: Reconciliation result keys: {list(reconciliation_result.keys()) if reconciliation_result else 'None'}")
-            if reconciliation_result and 'reconciliation_summary' in reconciliation_result:
-                summary = reconciliation_result['reconciliation_summary']
-                print(f"DEBUG UI: Summary content: {summary}")
-            
             self._display_simple_reconciliation_results(scrollable_frame, reconciliation_result, recon_engine)
             
             # Force multiple scroll region updates to ensure content is captured
@@ -533,9 +527,6 @@ class BankReconciliationUI:
             canvas.after(500, configure_scroll_region)  # Additional delayed update
             canvas.after(1000, final_scroll_update)     # Final comprehensive update
         except Exception as e:
-            print(f"DEBUG UI: Error during reconciliation: {str(e)}")
-            import traceback
-            traceback.print_exc()
             error_label = tk.Label(
                 scrollable_frame,
                 text=f"Error during reconciliation analysis:\n{str(e)}",
@@ -550,18 +541,10 @@ class BankReconciliationUI:
         try:
             # Header removed to save space - main header is already shown above
             
-            # Debug: Check what data we have
-            print(f"DEBUG UI Display: Results keys: {list(results.keys()) if results else 'None'}")
-            
             # Get simplified report data first, fallback to complex data
             simplified_data = results.get('simplified_report')
             main_data = simplified_data if simplified_data is not None else results.get('merged_pivot_data')
             summary = results.get('reconciliation_summary', {})
-            
-            print(f"DEBUG UI Display: Main data shape: {main_data.shape if hasattr(main_data, 'shape') else 'No shape'}")
-            print(f"DEBUG UI Display: Summary keys: {list(summary.keys()) if summary else 'Empty summary'}")
-            if summary:
-                print(f"DEBUG UI Display: Total matches from summary: {summary.get('total_matches', 'Not found')}")
             
             # If no data, show message
             if main_data is None or main_data.empty:

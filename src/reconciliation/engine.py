@@ -12,6 +12,7 @@ from dataframe_splitter import DataFrameSplitter
 from dataframe_merger import DataFrameMerger
 from dataframe_groupby import DataFrameGroupBy
 from excel_exporter import ExcelExporter
+from processors.process_utils import get_process_info, update_process_info, set_error_message
 
 class ReconciliationEngine:
     """Handles bank reconciliation operations"""
@@ -605,7 +606,7 @@ class ReconciliationEngine:
                                     'match_rate': merge_stats['match_rate'],
                                     'merge_efficiency': merge_stats.get('merge_efficiency', 0)
                                 },
-                            'debug_info': result['debug_info']
+                            'process_info': result['process_info']
                         }
                     else:
                         result['debug_info']['error_message'] = "Merge columns not found after processing"
