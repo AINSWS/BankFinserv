@@ -130,14 +130,6 @@ class ModularReconciliationEngine:
             # Stage 2: Group payment processing on mismatches from Stage 1
             if include_stage2 and not stage1_mismatches.empty:
                 print("\n🔄 Starting Stage 2: Group Payment Processing...")
-                
-                # Rename columns for Stage 2 processing
-                stage1_mismatches = stage1_mismatches.rename(columns={
-                    'system_amount': 'system_entry',
-                    'qr_amount': 'qr_collection',
-                    'group_name': 'group_id'
-                })
-                
                 stage2_result = self.process_stage2_group_payments(stage1_mismatches)
                 
                 if stage2_result.get('status') == 'success':
@@ -1207,8 +1199,7 @@ class ModularReconciliationEngine:
                 if not newly_matched.empty:
                     print(f"✓ Phase 3 found {len(newly_matched)} matches")
             
-            return result        
-        except Exception as e:
+            return result        except Exception as e:
             error_msg = f"Error in Phase 3 reconciliation processing: {str(e)}"
             print(f"❌ {error_msg}")
             import traceback

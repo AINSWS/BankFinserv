@@ -72,9 +72,7 @@ class Phase3ReconciliationProcessor:
                     'processing_summary': {}
                 }
             
-            print(f"   • Narration column: {narration_col}")
-            print(f"   • Debit column: {debit_col}")
-            print(f"   • Credit column: {credit_col}")
+
             
             # Step 2: Process narration splitting and loan ID extraction
             debit_df, credit_df = self._extract_loan_ids_from_narration(
@@ -96,12 +94,8 @@ class Phase3ReconciliationProcessor:
                 'total_credit_amount': credit_df['amount'].sum() if not credit_df.empty and 'amount' in credit_df.columns else 0
             }
             
-            print(f"✅ Phase 3 Processing Complete!")
-            print(f"   • Total records: {processing_summary['total_records_processed']}")
-            print(f"   • Debit transactions: {processing_summary['debit_transactions']}")
-            print(f"   • Credit transactions: {processing_summary['credit_transactions']}")
-            print(f"   • Unique debit loans: {processing_summary['unique_debit_loans']}")
-            print(f"   • Unique credit loans: {processing_summary['unique_credit_loans']}")
+            if processing_summary['debit_transactions'] > 0 or processing_summary['credit_transactions'] > 0:
+                print("✅ Phase 3 Processing Complete")
             
             return {
                 'status': 'success',
@@ -147,7 +141,7 @@ class Phase3ReconciliationProcessor:
         debit_records = []
         credit_records = []
         
-        print(f"   • Processing {len(df)} records for narration splitting...")
+
         
         for idx, row in df.iterrows():
             try:
@@ -194,8 +188,7 @@ class Phase3ReconciliationProcessor:
         debit_df = pd.DataFrame(debit_records)
         credit_df = pd.DataFrame(credit_records)
         
-        print(f"   • Extracted {len(debit_records)} debit transactions")
-        print(f"   • Extracted {len(credit_records)} credit transactions")
+
         
         return debit_df, credit_df
     
@@ -250,8 +243,7 @@ class Phase3ReconciliationProcessor:
             pivot_df = df.groupby('loan_id')['amount'].sum().reset_index()
             pivot_df.columns = ['loan_id', f'{transaction_type}_amount']
             
-            print(f"   • Created {transaction_type} pivot: {len(pivot_df)} unique loan IDs")
-            print(f"   • Total {transaction_type} amount: ₹{pivot_df[f'{transaction_type}_amount'].sum():,.2f}")
+
             
             return pivot_df
             
@@ -304,7 +296,7 @@ class Phase3ReconciliationProcessor:
             }
         
         try:
-            print("🔄 Phase 3: Analyzing credit/debit differences...")
+            print("🔄 Starting Phase 3 analysis...")
             
             newly_matched_records = []
             processed_loan_ids = set()
@@ -314,7 +306,6 @@ class Phase3ReconciliationProcessor:
                 loan_id = str(record['loan_id'])  # Convert to string for consistency
                 # Try multiple column names for QR amount
                 qr_amount = record.get('qr_amount', record.get('qr_collection', 0))
-                print(f"   Processing loan {loan_id}: QR={qr_amount} (type: {type(qr_amount)})")
                 
                 # Calculate credit/debit difference for this loan ID
                 credit_debit_result = self._calculate_credit_debit_difference(
@@ -325,8 +316,7 @@ class Phase3ReconciliationProcessor:
                 if credit_debit_result['found']:
                     credit_debit_difference = credit_debit_result['difference']
                     
-                    # Debug output
-                    print(f"   • Loan {loan_id}: Debit=₹{credit_debit_result['total_debit']}, Credit=₹{credit_debit_result['total_credit']}, Diff=₹{credit_debit_difference}, QR=₹{qr_amount}")
+                    # Debug output removed
                     
                     # Check if credit/debit difference matches QR amount within tolerance
                     amount_difference = abs(credit_debit_difference - qr_amount)
@@ -344,7 +334,7 @@ class Phase3ReconciliationProcessor:
                         newly_matched_records.append(resolved_record.to_dict())
                         processed_loan_ids.add(loan_id)
                         
-                        print(f"✅ Phase 3 Match: Loan {loan_id} - QR: ₹{qr_amount}, C/D Diff: ₹{credit_debit_difference}, Variance: ₹{amount_difference}")
+
             
             # Create results
             newly_matched_df = pd.DataFrame(newly_matched_records) if newly_matched_records else pd.DataFrame()
@@ -358,7 +348,8 @@ class Phase3ReconciliationProcessor:
                 'resolution_rate': (len(newly_matched_records) / len(mismatched_data)) * 100 if len(mismatched_data) > 0 else 0
             }
             
-            print(f"📊 Phase 3 Results: {len(newly_matched_records)} resolved, {len(remaining_mismatched_df)} still mismatched")
+            if newly_matched_records:
+                print(f"✅ Phase 3 resolved {len(newly_matched_records)} mismatches")
             
             return {
                 'newly_matched': newly_matched_df,

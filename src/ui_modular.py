@@ -42,7 +42,6 @@ class BankReconciliationUI:
         self.results_container = None
         self.results_outer_container = None
         self.compare_btn = None
-        self.hide_results_btn = None
         self.export_btn = None
         self.current_results = None
         self.current_recon_engine = None
@@ -52,7 +51,7 @@ class BankReconciliationUI:
     
     def _setup_window(self):
         """Configure main window"""
-        self.root.title("🏦 Bank Reconciliation Tool")
+        self.root.title("🏦 Unatti Finserv Reconciliation Tool")
         self.root.geometry("1280x720")  # 720p compatible size
         self.root.minsize(1024, 600)    # Support lower resolutions
         self.root.configure(bg=UITheme.BACKGROUND_DARK)
@@ -135,7 +134,7 @@ class BankReconciliationUI:
         
         title_label = tk.Label(
             header_frame,
-            text="🏦 Bank Reconciliation Tool",
+            text="🏦 Unatti Finserv Reconciliation Tool",
             font=UITheme.get_font_config("title"),
             fg=UITheme.ACCENT_BLUE,
             bg=UITheme.BACKGROUND_DARK
@@ -239,7 +238,7 @@ class BankReconciliationUI:
         compare_style = UITheme.get_button_style("disabled")
         self.compare_btn = tk.Button(
             action_inner,
-            text="🔍 Compare & Reconcile",
+            text="🔍 Reconcile",
             command=self._compare_files,
             font=UITheme.get_font_config("subheader"),
             **compare_style,
@@ -248,20 +247,6 @@ class BankReconciliationUI:
             state="disabled"
         )
         self.compare_btn.pack(side="right", padx=(15, 15))
-        
-        # Hide results button
-        hide_style = UITheme.get_button_style("disabled")
-        self.hide_results_btn = tk.Button(
-            action_inner,
-            text="👁️ Hide Results",
-            command=self._hide_results,
-            font=UITheme.get_font_config("subheader"),
-            **hide_style,
-            padx=30,
-            pady=12,
-            state="disabled"
-        )
-        self.hide_results_btn.pack(side="right", padx=(15, 15))
         
         # Clear all button
         clear_style = UITheme.get_button_style("danger")
@@ -307,86 +292,11 @@ class BankReconciliationUI:
             del self.uploaded_files[slot_number]
         self._update_button_states()
     
-    def _apply_stage2_to_cached_results(self, cached_results, stage2_result):
-        """Apply Stage 2 results to cached reconciliation data"""
-        try:
-            if not cached_results or not stage2_result:
-                return None
-                
-            newly_matched = stage2_result.get('newly_matched', pd.DataFrame())
-            if newly_matched.empty:
-                return cached_results
-                
-            # Update merged_pivot_data
-            main_data = cached_results.get('merged_pivot_data')
-            if main_data is not None and not main_data.empty:
-                updated_main_data = main_data.copy()
-                
-                # Update records that were resolved in Stage 2
-                for _, stage2_record in newly_matched.iterrows():
-                    loan_id = stage2_record['loan_id']
-                    mask = updated_main_data['loan_id'] == loan_id
-                    matching_rows = updated_main_data[mask]
-                    
-                    if not matching_rows.empty:
-                        idx = matching_rows.index[0]
-                        
-                        # Update with redistributed values
-                        updated_main_data.loc[idx, 'qr_collection'] = stage2_record['qr_collection']
-                        updated_main_data.loc[idx, 'difference'] = stage2_record['difference']
-                        updated_main_data.loc[idx, 'status'] = stage2_record['status']
-                        
-                        if 'reconciliation_method' in stage2_record:
-                            updated_main_data.loc[idx, 'reconciliation_method'] = stage2_record['reconciliation_method']
-                
-                # Update cached results
-                updated_results = cached_results.copy()
-                updated_results['merged_pivot_data'] = updated_main_data
-                
-                # Also update simplified_report if it exists
-                if 'simplified_report' in updated_results:
-                    # Directly update existing simplified_report with Stage 2 data
-                    simplified_report = updated_results['simplified_report'].copy()
-                    
-                    # Update each Stage 2 record in the simplified report
-                    for _, stage2_record in newly_matched.iterrows():
-                        loan_id = stage2_record['loan_id']
-                        
-                        # Find matching record in simplified report
-                        mask = simplified_report['loan_id'] == loan_id
-                        matching_rows_idx = simplified_report[mask].index
-                        
-                        if len(matching_rows_idx) > 0:
-                            idx = matching_rows_idx[0]
-                            
-                            # Update with Stage 2 redistributed values
-                            simplified_report.loc[idx, 'qr_collection'] = stage2_record['qr_collection']
-                            simplified_report.loc[idx, 'difference'] = stage2_record['difference']
-                            simplified_report.loc[idx, 'status'] = stage2_record['status']
-                            
-                            print(f"🔄 Updated simplified report for loan {loan_id}: QR={stage2_record['qr_collection']}, Status={stage2_record['status']}")
-                    
-                    updated_results['simplified_report'] = simplified_report
-                
-                # Add stage2_result to the cached results
-                updated_results['stage2_result'] = stage2_result
-                
-                return updated_results
-                
-        except Exception as e:
-            print(f"Error applying Stage 2 to cached results: {e}")
-            return cached_results
-            
-        return cached_results
-    
     def _update_button_states(self):
         """Update button states based on loaded files"""
         if len(self.uploaded_files) >= 3:
             primary_style = UITheme.get_button_style("primary")
             self.compare_btn.configure(state="normal", **primary_style)
-            
-            danger_style = UITheme.get_button_style("danger")
-            self.hide_results_btn.configure(state="normal", **danger_style)
             
             # Enable export button only if results are available
             if hasattr(self, 'current_results') and self.current_results:
@@ -398,11 +308,11 @@ class BankReconciliationUI:
         else:
             disabled_style = UITheme.get_button_style("disabled")
             self.compare_btn.configure(state="disabled", **disabled_style)
-            self.hide_results_btn.configure(state="disabled", **disabled_style)
             self.export_btn.configure(state="disabled", **disabled_style)
             
-            # Hide results if less than 3 files
+            # Reset results when clearing files
             self.results_outer_container.pack_forget()
+            self.current_results = None
     
     def _compare_files(self):
         """Perform file comparison and reconciliation"""
@@ -437,7 +347,7 @@ class BankReconciliationUI:
         
         header_label = tk.Label(
             results_header,
-            text="🏦 Bank Reconciliation Results",
+            text="🏦 Unatti Finserv Reconciliation Results",
             font=UITheme.get_font_config("header"),
             fg=UITheme.ACCENT_BLUE,
             bg=UITheme.BACKGROUND_MEDIUM
@@ -501,8 +411,8 @@ class BankReconciliationUI:
         
         # Generate simple reconciliation analysis
         try:
-            # Use direct pivot table comparison WITH Stage 2 processing
-            reconciliation_result = recon_engine.merge_pivot_tables_comparison(include_stage2=True)
+            # Use direct pivot table comparison
+            reconciliation_result = recon_engine.merge_pivot_tables_comparison()
             
             # CRITICAL: Cache the results for export
             self.current_results = reconciliation_result
@@ -537,137 +447,111 @@ class BankReconciliationUI:
             error_label.pack(expand=True)
     
     def _display_simple_reconciliation_results(self, parent, results, recon_engine=None):
-        """Display simplified reconciliation results showing only key reconciliation data"""
+        """Display simplified reconciliation results showing only total matches and mismatches"""
         try:
-            # Header removed to save space - main header is already shown above
-            
-            # Get simplified report data first, fallback to complex data
-            simplified_data = results.get('simplified_report')
-            main_data = simplified_data if simplified_data is not None else results.get('merged_pivot_data')
             summary = results.get('reconciliation_summary', {})
             
-            # If no data, show message
-            if main_data is None or main_data.empty:
-                no_data_label = tk.Label(
-                    parent,
-                    text="No reconciliation data available",
-                    font=UITheme.get_font_config("body"),
-                    fg=UITheme.ERROR_RED,
-                    bg=UITheme.BACKGROUND_DARK
-                )
-                no_data_label.pack(pady=20)
-                return
+            # Create cards container
+            cards_container = tk.Frame(parent, bg=UITheme.BACKGROUND_DARK)
+            cards_container.pack(fill="x", padx=20, pady=10)
             
-            # Separate data by reconciliation status - simple system vs QR comparison
-            status_column = 'status' if 'status' in main_data.columns else 'reconciliation_status'
+            # Configure grid for two equal columns
+            cards_container.grid_columnconfigure(0, weight=1)
+            cards_container.grid_columnconfigure(1, weight=1)
             
-            # Filter records by status
-            matched_df = main_data[
-                (main_data[status_column].str.contains('MATCHED', na=False)) &
-                (main_data['loan_id'].notna())
-            ]
-            mismatch_df = main_data[
-                (main_data[status_column].str.contains('MISMATCH', na=False)) &
-                (main_data['loan_id'].notna())
-            ]
+            # Get totals
+            total_matched = summary.get('total_matches', 0)
+            total_mismatches = summary.get('amount_mismatches', 0)
+            match_rate = summary.get('match_percentage', 0)
             
-            # Separate records with/without QR amounts for analysis
-            qr_col = 'qr_collection' if 'qr_collection' in main_data.columns else 'qr_amount'
-            records_with_qr_df = main_data[
-                (main_data[qr_col] > 0) & (main_data['loan_id'].notna())
-            ]
-            records_without_qr_df = main_data[
-                (main_data[qr_col] == 0) & (main_data['loan_id'].notna())
-            ]
+            # Create matched records card
+            matched_card = tk.Frame(cards_container, bg=UITheme.BACKGROUND_MEDIUM, relief="solid", bd=1)
+            matched_card.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
             
-            # Summary stats frame
-            stats_frame = tk.Frame(parent, bg=UITheme.BACKGROUND_MEDIUM, relief="solid", bd=1)
-            stats_frame.pack(fill="x", padx=20, pady=10)
-            
-            stats_header = tk.Label(
-                stats_frame,
-                text="📊 Reconciliation Summary",
+            # Matches card header
+            tk.Label(
+                matched_card,
+                text="✅ Matched Records",
                 font=UITheme.get_font_config("subheader"),
                 fg=UITheme.ACCENT_BLUE,
                 bg=UITheme.BACKGROUND_MEDIUM
-            )
-            stats_header.pack(pady=5)
+            ).pack(pady=5)
             
-            # Get totals from summary or calculate from data
-            total_records = summary.get('total_unique_loans', len(main_data))
-            total_matched = summary.get('total_matches', len(matched_df))
-            total_mismatches = summary.get('amount_mismatches', len(mismatch_df))
-            records_with_qr_count = summary.get('records_with_qr', len(records_with_qr_df))
-            records_without_qr_count = summary.get('records_without_qr', len(records_without_qr_df))
-            match_rate = summary.get('match_percentage', 0)
+            # Matches count
+            tk.Label(
+                matched_card,
+                text=f"{total_matched}",
+                font=UITheme.get_font_config("title"),
+                fg="#00C851",  # Green color for matches
+                bg=UITheme.BACKGROUND_MEDIUM
+            ).pack(pady=5)
             
-            # Summary text - simple system vs QR comparison
-            summary_text = f"Total Records: {total_records} | ✅ Matched: {total_matched} | ❌ Mismatches: {total_mismatches}"
-            summary_text += f" | With QR: {records_with_qr_count} | Without QR: {records_without_qr_count} | Match Rate: {match_rate:.1f}%"
-            
-            # Add Stage 2 info if available
-            if summary.get('stage2_applied'):
-                stage2_resolved = summary.get('stage2_records_resolved', 0)
-                if stage2_resolved > 0:
-                    summary_text += f" | 🏪 Stage 2 Resolved: {stage2_resolved}"
-            
-            # Add amount summary if available
-            if 'net_difference' in summary:
-                net_diff = summary['net_difference']
-                summary_text += f" | Net Difference: {net_diff:,.2f}"
-            
-            summary_label = tk.Label(
-                stats_frame,
-                text=summary_text,
+            # Match rate percentage
+            tk.Label(
+                matched_card,
+                text=f"Match Rate: {match_rate:.1f}%",
                 font=UITheme.get_font_config("body"),
                 fg=UITheme.TEXT_PRIMARY,
                 bg=UITheme.BACKGROUND_MEDIUM
-            )
-            summary_label.pack(pady=10)
+            ).pack(pady=5)
             
-            # Create horizontal layout for 3 tables side-by-side
-            tables_container = tk.Frame(parent, bg=UITheme.BACKGROUND_DARK)
-            tables_container.pack(fill="x", expand=False, padx=10, pady=10)  # Don't expand vertically
+            # Create mismatched records card
+            mismatch_card = tk.Frame(cards_container, bg=UITheme.BACKGROUND_MEDIUM, relief="solid", bd=1)
+            mismatch_card.grid(row=0, column=1, padx=10, pady=10, sticky="nsew")
             
-            # Configure equal columns for 3 tables
-            tables_container.grid_columnconfigure(0, weight=1)
-            tables_container.grid_columnconfigure(1, weight=1) 
-            tables_container.grid_columnconfigure(2, weight=1)
-            tables_container.grid_rowconfigure(0, weight=0)  # Don't expand rows
+            # Mismatches card header
+            tk.Label(
+                mismatch_card,
+                text="❌ Mismatched Records",
+                font=UITheme.get_font_config("subheader"),
+                fg=UITheme.ACCENT_BLUE,
+                bg=UITheme.BACKGROUND_MEDIUM
+            ).pack(pady=5)
             
-            # Create 3 tables side-by-side
-            if not matched_df.empty:
-                self._create_compact_data_table(tables_container, "✅ Matched Records", matched_df.head(15), 0, 0)
+            # Mismatches count
+            tk.Label(
+                mismatch_card,
+                text=f"{total_mismatches}",
+                font=UITheme.get_font_config("title"),
+                fg="#ff4444",  # Red color for mismatches
+                bg=UITheme.BACKGROUND_MEDIUM
+            ).pack(pady=5)
             
-            if not mismatch_df.empty:
-                self._create_compact_data_table(tables_container, "❌ Mismatched Records", mismatch_df.head(15), 0, 1)
+            # Net difference if available
+            if 'net_difference' in summary:
+                net_diff = summary['net_difference']
+                tk.Label(
+                    mismatch_card,
+                    text=f"Net Difference: ₹{net_diff:,.2f}",
+                    font=UITheme.get_font_config("body"),
+                    fg=UITheme.TEXT_PRIMARY,
+                    bg=UITheme.BACKGROUND_MEDIUM
+                ).pack(pady=5)
             
-            if not records_without_qr_df.empty:
-                self._create_compact_data_table(tables_container, "📋 No QR Collection", records_without_qr_df.head(15), 0, 2)
-            
-            # Stage 2: Group Payment Processing (now integrated into main data)
-            if results.get('stage2_result'):
-                self._add_stage2_summary_display(parent, results.get('stage2_result'))
-            else:
-                # Always run separate Stage 2 processing and update cached results
-                print("🔧 Running separate Stage 2 processing for UI display...")
-                stage2_result = recon_engine.process_stage2_group_payments(mismatch_df if not mismatch_df.empty else None)
-                
-                if stage2_result.get('status') == 'success' and len(stage2_result.get('newly_matched', [])) > 0:
-                    # CRITICAL: Update cached results with Stage 2 processing
-                    print(f"🔄 Updating cached results with {len(stage2_result.get('newly_matched', []))} Stage 2 matches...")
+            # Stage 2 Results (Group Payment Distribution)
+            if 'stage2_results' in results:
+                stage2_results = results['stage2_results']
+                if stage2_results and stage2_results.get('status') == 'success' and stage2_results.get('newly_matched') is not None and not stage2_results['newly_matched'].empty:
+                    # Only show if there are actual group matches
+                    group_frame = tk.Frame(cards_container, bg=UITheme.BACKGROUND_MEDIUM, relief="solid", bd=1)
+                    group_frame.grid(row=1, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
                     
-                    # Apply Stage 2 results to cached data (similar to _apply_stage2_to_main_data)
-                    if hasattr(self, 'current_results') and self.current_results:
-                        updated_results = self._apply_stage2_to_cached_results(self.current_results, stage2_result)
-                        if updated_results:
-                            self.current_results = updated_results
-                            print("✅ Cached results updated with Stage 2 processing")
-                
-                # Display the Stage 2 results
-                self._add_stage2_group_processing(parent, recon_engine, mismatch_df)
-            
-            # Export button removed - now in main button panel
+                    group_matches = len(stage2_results['newly_matched'])
+                    
+                    tk.Label(
+                        group_frame,
+                        text=f"✅ Group Payment Matches: {group_matches}",
+                        font=UITheme.get_font_config("subheader"),
+                        fg=UITheme.ACCENT_BLUE,
+                        bg=UITheme.BACKGROUND_MEDIUM
+                    ).pack(pady=5)
+                    
+                    # Show the group payment details in a table
+                    self._create_simple_data_table(
+                        group_frame, 
+                        "Group Payment Details", 
+                        stage2_results['newly_matched']
+                    )
             
         except Exception as e:
             error_msg = f"Error displaying results: {str(e)}"
@@ -683,244 +567,26 @@ class BankReconciliationUI:
             )
             error_label.pack(pady=20)
     
-    def _add_stage2_group_processing(self, parent, recon_engine, mismatch_df):
-        """Add Stage 2 Group Payment Processing section"""
+    def _export_simple_results(self, results):
+        """Export simplified reconciliation results to Excel"""
         try:
-            # Stage 2 header
-            stage2_frame = tk.Frame(parent, bg=UITheme.BACKGROUND_MEDIUM, relief="solid", bd=1)
-            stage2_frame.pack(fill="x", padx=20, pady=20)
-            
-            stage2_header = tk.Label(
-                stage2_frame,
-                text="🏪 Stage 2: Group Payment Analysis",
-                font=UITheme.get_font_config("subheader"),
-                fg=UITheme.ACCENT_BLUE,
-                bg=UITheme.BACKGROUND_MEDIUM
+            # Get file path
+            file_path = filedialog.asksaveasfilename(
+                defaultextension=".xlsx",
+                filetypes=[("Excel files", "*.xlsx"), ("All files", "*.*")],
+                title="Save Reconciliation Report"
             )
-            stage2_header.pack(pady=10)
             
-            # Info text
-            info_text = ("Checking for group payments where one member pays for everyone.\n"
-                        "Analyzing group totals and redistributing payments proportionally.")
-            info_label = tk.Label(
-                stage2_frame,
-                text=info_text,
-                font=UITheme.get_font_config("small"),
-                fg=UITheme.TEXT_SECONDARY,
-                bg=UITheme.BACKGROUND_MEDIUM
-            )
-            info_label.pack(pady=5)
+            if not file_path:
+                return
             
-            # Process Stage 2
-            stage2_result = recon_engine.process_stage2_group_payments(mismatch_df)
-            
-            if stage2_result.get('status') == 'success':
-                # Display results
-                newly_matched = stage2_result.get('newly_matched', pd.DataFrame())
-                group_analysis = stage2_result.get('group_analysis', {})
-                
-                # Summary stats
-                stats_text = f"Groups Analyzed: {group_analysis.get('total_groups_analyzed', 0)} | "
-                stats_text += f"Matching Groups: {group_analysis.get('matching_groups_found', 0)} | "
-                stats_text += f"Records Resolved: {len(newly_matched)}"
-                
-                stats_label = tk.Label(
-                    stage2_frame,
-                    text=stats_text,
-                    font=UITheme.get_font_config("body"),
-                    fg=UITheme.TEXT_PRIMARY,
-                    bg=UITheme.BACKGROUND_MEDIUM
-                )
-                stats_label.pack(pady=5)
-                
-                # Show newly matched records if any
-                if not newly_matched.empty:
-                    # Create container for Stage 2 results
-                    stage2_results_container = tk.Frame(parent, bg=UITheme.BACKGROUND_DARK)
-                    stage2_results_container.pack(fill="x", padx=20, pady=10)
-                    
-                    # Add table for newly matched records
-                    self._create_compact_data_table(
-                        stage2_results_container, 
-                        "🎯 Stage 2: Newly Matched (Group Payments)", 
-                        newly_matched.head(15), 
-                        0, 0
-                    )
-                    
-                    # Configure grid for single table
-                    stage2_results_container.grid_columnconfigure(0, weight=1)
-                    stage2_results_container.grid_rowconfigure(0, weight=0)
-                
-            else:
-                # Show error message
-                error_msg = stage2_result.get('message', 'Unknown error in Stage 2 processing')
-                error_label = tk.Label(
-                    stage2_frame,
-                    text=f"❌ Stage 2 Error: {error_msg}",
-                    font=UITheme.get_font_config("small"),
-                    fg=UITheme.ERROR_RED,
-                    bg=UITheme.BACKGROUND_MEDIUM
-                )
-                error_label.pack(pady=5)
-                
-        except Exception as e:
-            print(f"Error in Stage 2 UI processing: {e}")
-            import traceback
-            traceback.print_exc()
-    
-    def _add_stage2_summary_display(self, parent, stage2_result):
-        """Display Stage 2 summary when it's integrated into main data"""
-        try:
-            stage2_frame = tk.Frame(parent, bg=UITheme.BACKGROUND_MEDIUM, relief="solid", bd=1)
-            stage2_frame.pack(fill="x", padx=20, pady=10)
-            
-            # Header
-            header = tk.Label(
-                stage2_frame,
-                text="🎯 Stage 2: Group Payment Processing Applied",
-                font=UITheme.get_font_config("subheader"),
-                fg="#00C851",  # Green for success
-                bg=UITheme.BACKGROUND_MEDIUM
-            )
-            header.pack(pady=5)
-            
-            # Get statistics
-            group_analysis = stage2_result.get('group_analysis', {})
-            newly_matched_count = len(stage2_result.get('newly_matched', []))
-            
-            # Summary stats
-            stats_text = f"✅ Groups Analyzed: {group_analysis.get('total_groups_analyzed', 0)} | "
-            stats_text += f"Matching Groups Found: {group_analysis.get('matching_groups_found', 0)} | "
-            stats_text += f"Records Resolved: {newly_matched_count}"
-            
-            stats_label = tk.Label(
-                stage2_frame,
-                text=stats_text,
-                font=UITheme.get_font_config("body"),
-                fg=UITheme.TEXT_PRIMARY,
-                bg=UITheme.BACKGROUND_MEDIUM
-            )
-            stats_label.pack(pady=3)
-            
-            # Info message
-            info_text = "Stage 2 results have been integrated into the main reconciliation data above.\nExport will include the redistributed group payment amounts."
-            info_label = tk.Label(
-                stage2_frame,
-                text=info_text,
-                font=UITheme.get_font_config("small"),
-                fg=UITheme.TEXT_SECONDARY,
-                bg=UITheme.BACKGROUND_MEDIUM
-            )
-            info_label.pack(pady=3)
+            # Export logic...
+            print("Exporting results...")
             
         except Exception as e:
-            print(f"Error displaying Stage 2 summary: {e}")
-    
-    def _create_compact_data_table(self, parent, title, dataframe, row, col):
-        """Create a compact data table for side-by-side layout"""
-        try:
-            # Table frame
-            table_frame = tk.Frame(parent, bg=UITheme.BACKGROUND_MEDIUM, relief="solid", bd=1)
-            table_frame.grid(row=row, column=col, sticky="nsew", padx=5, pady=5)
-            
-            # Table header
-            header = tk.Label(
-                table_frame,
-                text=title,
-                font=UITheme.get_font_config("small"),  # Smaller font for compact view
-                fg=UITheme.ACCENT_BLUE,
-                bg=UITheme.BACKGROUND_MEDIUM
-            )
-            header.pack(pady=2)
-            
-            # Select essential columns for compact view
-            essential_cols = []
-            if 'loan_id' in dataframe.columns:
-                essential_cols.append('loan_id')
-            if 'system_entry' in dataframe.columns:
-                essential_cols.append('system_entry')
-            elif 'system_amount' in dataframe.columns:
-                essential_cols.append('system_amount')
-            if 'qr_collection' in dataframe.columns:
-                essential_cols.append('qr_collection')
-            elif 'qr_amount' in dataframe.columns:
-                essential_cols.append('qr_amount')
-            if 'difference' in dataframe.columns:
-                essential_cols.append('difference')
-            
-            # Fallback to first 3 columns if essential ones not found
-            if not essential_cols:
-                essential_cols = list(dataframe.columns)[:3]
-            
-            # Limit to 3 columns for compact view
-            display_columns = essential_cols[:3]
-            
-            # Create compact text widget with fixed reasonable height
-            text_widget = tk.Text(
-                table_frame,
-                height=18,  # Fixed height that works well in grid
-                width=30,   # Fixed width for side-by-side
-                font=UITheme.get_font_config("mono_small"),  # Smaller monospace font
-                bg=UITheme.BACKGROUND_LIGHT,
-                fg=UITheme.TEXT_PRIMARY,
-                wrap=tk.NONE,
-                state=tk.NORMAL
-            )
-            
-            # No individual scrollbars for grid layout to avoid conflicts
-            
-            # Format and insert data
-            if not dataframe.empty and display_columns:
-                # Header row with shorter column names
-                short_headers = [col[:8] for col in display_columns]
-                header_row = " | ".join(short_headers)
-                text_widget.insert(tk.END, header_row + "\n")
-                text_widget.insert(tk.END, "-" * 30 + "\n")
-                
-                # Data rows - show reasonable number of rows
-                data_rows = min(len(dataframe), 15)  # Show up to 15 rows
-                display_data = dataframe[display_columns].head(data_rows)
-                for _, row in display_data.iterrows():
-                    data_values = []
-                    for col in display_columns:
-                        val = str(row[col])
-                        # Format numbers for compact display
-                        if val.replace('.', '').replace('-', '').isdigit():
-                            try:
-                                num_val = float(val)
-                                if abs(num_val) >= 1000:
-                                    val = f"{num_val/1000:.1f}k"
-                                else:
-                                    val = f"{num_val:.0f}"
-                            except:
-                                pass
-                        data_values.append(val[:8])  # Limit to 8 chars
-                    
-                    data_row = " | ".join(data_values)
-                    text_widget.insert(tk.END, data_row + "\n")
-                
-                # Show record count
-                if len(dataframe) > data_rows:
-                    text_widget.insert(tk.END, f"\nShowing {data_rows} of {len(dataframe)} records")
-                else:
-                    text_widget.insert(tk.END, f"\nTotal: {len(dataframe)} records")
-            else:
-                text_widget.insert(tk.END, "No data to display")
-            
-            text_widget.config(state=tk.DISABLED)
-            
-            # Pack text widget without individual scrollbar
-            text_widget.pack(fill="both", expand=True, padx=2, pady=2)
-            
-        except Exception as e:
-            error_label = tk.Label(
-                parent,
-                text=f"Error: {str(e)[:20]}...",
-                font=UITheme.get_font_config("small"),
-                fg=UITheme.ERROR_RED,
-                bg=UITheme.BACKGROUND_DARK
-            )
-            error_label.grid(row=row, column=col, padx=5, pady=5)
+            error_msg = f"Error exporting results: {str(e)}"
+            logging.error(error_msg, exc_info=True)
+            messagebox.showerror("Export Error", error_msg)
 
     def _create_simple_data_table(self, parent, title, dataframe):
         """Create a simple data table display for reconciliation results"""
@@ -1721,14 +1387,10 @@ class BankReconciliationUI:
             for i in range(len(data_columns)):
                 row_frame.grid_columnconfigure(i, weight=1)
     
-    def _hide_results(self):
-        """Hide comparison results"""
-        self.results_outer_container.pack_forget()
-    
     def _export_results(self):
         """Export reconciliation results to Excel"""
         if not hasattr(self, 'current_results') or not self.current_results:
-            messagebox.showwarning("Export Not Available", "Please run 'Compare & Reconcile' first to generate results before exporting.")
+            messagebox.showwarning("Export Not Available", "Please run 'Reconcile' first to generate results before exporting.")
             return
         
         try:

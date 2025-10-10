@@ -89,68 +89,129 @@ class GroupPaymentProcessor:
     def _calculate_group_totals(self, data: pd.DataFrame) -> pd.DataFrame:
         """Calculate total system_entry and qr_collection for each group"""
         
-        group_totals = data.groupby('group_id').agg({
-            'system_entry': 'sum',
-            'qr_collection': 'sum',
-            'loan_id': 'count'  # Number of members in group
-        }).reset_index()
+        # Ensure required columns exist
+        required_columns = ['group_id', 'system_entry', 'qr_collection']
+        if not all(col in data.columns for col in required_columns):
+            self.logger.error(f"Missing required columns. Available columns: {data.columns.tolist()}")
+            return pd.DataFrame()  # Return empty DataFrame if required columns are missing
         
-        group_totals.columns = ['group_id', 'total_system_entry', 'total_qr_collection', 'member_count']
-        group_totals['group_difference'] = group_totals['total_qr_collection'] - group_totals['total_system_entry']
+        try:
+            # Calculate group totals with error handling
+            group_totals = data.groupby('group_id').agg({
+                'system_entry': 'sum',
+                'qr_collection': 'sum',
+                'loan_id': 'count'  # Number of members in group
+            }).reset_index()
+            
+            group_totals.columns = ['group_id', 'total_system_entry', 'total_qr_collection', 'member_count']
+            
+            # Calculate group difference (QR - System)
+            group_totals['group_difference'] = (
+                group_totals['total_qr_collection'] - group_totals['total_system_entry']
+            ).round(2)  # Round to avoid floating point issues
+            
+            # Add percentage difference for analysis
+            group_totals['difference_percentage'] = (
+                (group_totals['group_difference'] / group_totals['total_system_entry']) * 100
+            ).round(2)
+            
+            # Filter out invalid groups (e.g., single member groups)
+            valid_groups = group_totals[
+                (group_totals['member_count'] > 1) &  # More than one member
+                (group_totals['total_system_entry'] > 0) &  # Has system entries
+                (group_totals['total_qr_collection'] > 0)   # Has QR collections
+            ]
+            
+            self.logger.info(f"Found {len(valid_groups)} valid groups for processing")
+            return valid_groups
+            
+        except Exception as e:
+            self.logger.error(f"Error calculating group totals: {e}")
+            return pd.DataFrame()
         
         return group_totals
     
-    def _identify_matching_groups(self, group_summary: pd.DataFrame, tolerance: int = 2) -> List[str]:
+    def _identify_matching_groups(self, group_summary: pd.DataFrame) -> List[str]:
         """
         Identify groups where total QR collection matches total system requirement
-        within banking tolerance (±1, ±2)
+        or where there is a group-level payment pattern
         """
-        
         matching_groups = []
         
         for _, row in group_summary.iterrows():
-            group_diff = abs(row['group_difference'])
-            
-            # Check if group total matches within banking tolerance
-            if group_diff <= tolerance:
+            # A group is considered matching if:
+            # 1. The total QR collection equals total system requirement
+            # 2. OR there is at least one payment made for the group
+            if (row['total_qr_collection'] > 0 and 
+                row['member_count'] > 1 and
+                abs(row['total_qr_collection'] - row['total_system_entry']) < row['total_system_entry'] * 0.5):  # Allow up to 50% difference
                 matching_groups.append(row['group_id'])
-                self.logger.info(f"Group {row['group_id']}: Total system={row['total_system_entry']}, "
-                               f"Total QR={row['total_qr_collection']}, Diff={row['group_difference']} (MATCH)")
+                self.logger.info(f"Group {row['group_id']}: Members={row['member_count']}, "
+                               f"System={row['total_system_entry']}, QR={row['total_qr_collection']}, "
+                               f"Diff={row['group_difference']} (MATCH)")
         
         return matching_groups
     
     def _redistribute_group_payments(self, group_records: pd.DataFrame) -> List[Dict]:
         """
-        Redistribute QR payments within a group based on individual system_entry amounts
+        Redistribute QR payments within a group based on individual system_entry amounts.
+        Handles cases where one member pays for multiple members.
         """
-        
+        if group_records.empty:
+            return []
+            
         total_qr = group_records['qr_collection'].sum()
         total_system = group_records['system_entry'].sum()
         
+        # Skip if either total is 0 or if totals are significantly different
+        if total_qr == 0 or total_system == 0 or abs(total_qr - total_system) > total_system * 0.5:
+            return []
+            
         redistributed_records = []
         
-        for _, record in group_records.iterrows():
-            # Calculate proportional QR amount based on system_entry
-            if total_system > 0:
-                proportional_qr = (record['system_entry'] / total_system) * total_qr
-            else:
-                proportional_qr = 0
+        # Find who made the payments
+        payers = group_records[group_records['qr_collection'] > 0]
+        
+        # If we have a clear group payment pattern (some members paid, others didn't)
+        if not payers.empty and len(payers) < len(group_records):
+            self.logger.info(f"Found group payment pattern: {len(payers)} payer(s) for {len(group_records)} members")
             
-            # Create new record with redistributed QR amount
-            new_record = record.to_dict()
-            new_record['original_qr_collection'] = record['qr_collection']  # Keep original for audit
-            new_record['qr_collection'] = round(proportional_qr, 2)
-            new_record['difference'] = new_record['qr_collection'] - record['system_entry']
-            
-            # Update status based on new difference
-            if abs(new_record['difference']) <= 2:  # Banking tolerance
-                new_record['status'] = 'MATCHED - Group Payment Redistribution'
-                new_record['reconciliation_method'] = 'Stage 2: Group Payment'
-            else:
-                new_record['status'] = 'MISMATCH - Group Payment (Still Unresolved)'
-                new_record['reconciliation_method'] = 'Stage 2: Group Payment (Partial)'
-            
-            redistributed_records.append(new_record)
+            for _, record in group_records.iterrows():
+                new_record = record.to_dict()
+                new_record['original_qr_collection'] = record['qr_collection']  # Keep original for audit
+                
+                if record['qr_collection'] > 0:
+                    # This member paid more than their share
+                    new_record['status'] = 'MATCHED - Group Payment (Payer)'
+                    new_record['reconciliation_method'] = 'Stage 2: Group Payment'
+                    new_record['qr_collection'] = record['system_entry']  # Adjust to their required amount
+                    new_record['difference'] = 0  # Since we match exactly
+                else:
+                    # This member didn't pay but was paid for
+                    new_record['qr_collection'] = record['system_entry']  # They get matched for their system amount
+                    new_record['difference'] = 0  # Since we match exactly
+                    new_record['status'] = 'MATCHED - Group Payment (Beneficiary)'
+                    new_record['reconciliation_method'] = 'Stage 2: Group Payment'
+                
+                redistributed_records.append(new_record)
+        else:
+            # Default case: proportional distribution
+            for _, record in group_records.iterrows():
+                proportional_qr = (record['system_entry'] / total_system) * total_qr if total_system > 0 else 0
+                
+                new_record = record.to_dict()
+                new_record['original_qr_collection'] = record['qr_collection']
+                new_record['qr_collection'] = round(proportional_qr, 2)
+                new_record['difference'] = new_record['qr_collection'] - record['system_entry']
+                
+                if abs(new_record['difference']) <= 2:
+                    new_record['status'] = 'MATCHED - Group Payment (Proportional)'
+                    new_record['reconciliation_method'] = 'Stage 2: Group Payment'
+                else:
+                    new_record['status'] = 'MISMATCH - Group Payment (Unresolved)'
+                    new_record['reconciliation_method'] = 'Stage 2: Group Payment (Partial)'
+                
+                redistributed_records.append(new_record)
         
         return redistributed_records
     

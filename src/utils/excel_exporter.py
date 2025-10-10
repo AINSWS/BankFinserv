@@ -628,7 +628,6 @@ class ExcelExporter:
                 raise ValueError("No reconciliation data available to export")
             
             with pd.ExcelWriter(file_path, engine='openpyxl') as writer:
-                
                 # Sheet 1: Executive Summary
                 self._create_executive_summary_sheet(writer, summary, main_data)
                 
@@ -637,11 +636,18 @@ class ExcelExporter:
                     # Add summary columns for better analysis
                     enhanced_data = main_data.copy()
                     
-                    # Add difference calculation if both amounts exist
-                    if 'system_amount' in enhanced_data.columns and 'qr_amount' in enhanced_data.columns:
-                        enhanced_data['amount_difference'] = enhanced_data['system_amount'] - enhanced_data['qr_amount']
-                        enhanced_data['abs_difference'] = enhanced_data['amount_difference'].abs()
+                    # Handle both system_entry/qr_collection and system_amount/qr_amount columns
+                    amount_pairs = [
+                        ('system_entry', 'qr_collection'),
+                        ('system_amount', 'qr_amount')
+                    ]
                     
+                    for sys_col, qr_col in amount_pairs:
+                        if sys_col in enhanced_data.columns and qr_col in enhanced_data.columns:
+                            enhanced_data['amount_difference'] = enhanced_data[sys_col] - enhanced_data[qr_col]
+                            enhanced_data['abs_difference'] = enhanced_data['amount_difference'].abs()
+                            break  # Use first available pair
+                            
                     # Find status column
                     status_column = None
                     for col in ['status', 'reconciliation_status']:
@@ -655,31 +661,40 @@ class ExcelExporter:
                     
                     if status_column:
                         # Sheet 3: Matched Records (all types)
-                        matched_df = enhanced_data[enhanced_data[status_column].str.contains('MATCHED', na=False)]
+                        matched_df = enhanced_data[enhanced_data[status_column].str.contains('MATCHED|Group Payment', na=False)]
                         if not matched_df.empty:
                             matched_df.to_excel(writer, sheet_name='Matched_Records', index=False)
                             print(f"   ✓ Matched records exported ({len(matched_df)} entries)")
                         
-                        # Sheet 4: Bank Only Records (no QR data)
+                        # Sheet 4: Group Payment Results
+                        group_df = enhanced_data[enhanced_data[status_column].str.contains('Group Payment', na=False)]
+                        if not group_df.empty:
+                            group_df.to_excel(writer, sheet_name='Group_Payment_Results', index=False)
+                            print(f"   ✓ Group payment results exported ({len(group_df)} entries)")
+                        
+                        # Sheet 5: Bank Only Records (no QR data)
                         bank_only_df = enhanced_data[
-                            (enhanced_data['qr_amount'].isna() | (enhanced_data['qr_amount'] == 0)) & 
-                            (enhanced_data['system_amount'] > 0)
+                            (enhanced_data['qr_collection'].isna() | (enhanced_data['qr_collection'] == 0)) & 
+                            (enhanced_data['system_entry'] > 0)
                         ]
                         if not bank_only_df.empty:
                             bank_only_df.to_excel(writer, sheet_name='Bank_Only_Records', index=False)
                             print(f"   ✓ Bank only records exported ({len(bank_only_df)} entries)")
                         
-                        # Sheet 5: QR Only Records (no bank data)
+                        # Sheet 6: QR Only Records (no bank data)
                         qr_only_df = enhanced_data[
-                            (enhanced_data['system_amount'].isna() | (enhanced_data['system_amount'] == 0)) & 
-                            (enhanced_data['qr_amount'] > 0)
+                            (enhanced_data['system_entry'].isna() | (enhanced_data['system_entry'] == 0)) & 
+                            (enhanced_data['qr_collection'] > 0)
                         ]
                         if not qr_only_df.empty:
                             qr_only_df.to_excel(writer, sheet_name='QR_Only_Records', index=False)
                             print(f"   ✓ QR only records exported ({len(qr_only_df)} entries)")
                         
-                        # Sheet 6: Unresolved Mismatches
-                        mismatch_df = enhanced_data[enhanced_data[status_column].str.contains('MISMATCH', na=False)]
+                        # Sheet 7: Unresolved Mismatches
+                        mismatch_df = enhanced_data[
+                            enhanced_data[status_column].str.contains('MISMATCH', na=False) & 
+                            ~enhanced_data[status_column].str.contains('Group Payment', na=False)
+                        ]
                         if not mismatch_df.empty:
                             # Sort by absolute difference (highest first)
                             if 'abs_difference' in mismatch_df.columns:
@@ -738,16 +753,24 @@ class ExcelExporter:
                 summary_items.append(['', ''])
             
             # Add phase-specific analysis
-            if main_data is not None and 'status' in main_data.columns:
-                phase3_matches = len(main_data[main_data['status'].str.contains('Phase 3', na=False)])
-                group_matches = len(main_data[main_data['status'].str.contains('Group Payment', na=False)])
-                
-                summary_items.extend([
-                    ['📈 ADVANCED RECONCILIATION', ''],
-                    ['Phase 3 (Credit/Debit) Matches', f'{phase3_matches:,}'],
-                    ['Stage 2 (Group Payment) Matches', f'{group_matches:,}'],
-                    ['Standard Matches', f'{perfect_matches + minor_matches - phase3_matches - group_matches:,}']
-                ])
+            if main_data is not None:
+                status_col = 'status' if 'status' in main_data.columns else 'reconciliation_status'
+                if status_col in main_data.columns:
+                    # Count different types of matches
+                    phase3_matches = len(main_data[main_data[status_col].str.contains('Phase 3', na=False)])
+                    group_payer_matches = len(main_data[main_data[status_col].str.contains('Group Payment \(Payer\)', na=False)])
+                    group_beneficiary_matches = len(main_data[main_data[status_col].str.contains('Group Payment \(Beneficiary\)', na=False)])
+                    total_group_matches = group_payer_matches + group_beneficiary_matches
+                    
+                    summary_items.extend([
+                        ['📈 ADVANCED RECONCILIATION', ''],
+                        ['Phase 3 (Credit/Debit) Matches', f'{phase3_matches:,}'],
+                        ['Stage 2 (Group Payment) Details:', ''],
+                        ['  • Group Payers', f'{group_payer_matches:,}'],
+                        ['  • Group Beneficiaries', f'{group_beneficiary_matches:,}'],
+                        ['  • Total Group Payments', f'{total_group_matches:,}'],
+                        ['Standard Matches', f'{perfect_matches + minor_matches - phase3_matches - total_group_matches:,}']
+                    ])
             
             # Convert to DataFrame
             summary_df = pd.DataFrame(summary_items, columns=['Metric', 'Value'])

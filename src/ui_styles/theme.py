@@ -10,13 +10,13 @@ class UITheme:
     BACKGROUND_DARK = "#0f1419"
     BACKGROUND_MEDIUM = "#1a1f29"
     BACKGROUND_LIGHT = "#2c3440"
-    ACCENT_BLUE = "#4A90E2"
+    ACCENT_BLUE = "#0f75bc"
     ACCENT_BLUE_DARK = "#357ABD"
     ACCENT_BLUE_LIGHT = "#87CEEB"
     TEXT_PRIMARY = "#ffffff"
     TEXT_SECONDARY = "#8a92a3"
     SUCCESS_GREEN = "#1a3d4d"
-    ERROR_RED = "#ff6b6b"
+    ERROR_RED = "#fd5e1f"
     WARNING_ORANGE = "#ff9500"
     
     @staticmethod
@@ -66,7 +66,7 @@ class UITheme:
             "danger": {
                 "bg": UITheme.ERROR_RED,
                 "fg": UITheme.TEXT_PRIMARY,
-                "activebackground": "#ff5252",
+                "activebackground": "#ff9500",
                 "relief": "flat",
                 "cursor": "hand2"
             },
