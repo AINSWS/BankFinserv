@@ -161,6 +161,171 @@ class ExportManager:
         print(f"✅ Individual sheet exports completed!")
         return export_paths
     
+    def export_bank_ledger_with_reconciliation(self, bank_processor, reconciliation_data, output_filename: str = None, output_dir: str = None) -> str:
+        """
+        Export original bank ledger with added Remarks column showing reconciliation status
+        
+        Args:
+            bank_processor: BankLedgerProcessor instance
+            reconciliation_data: Reconciliation results dict with 'merged_pivot_data'
+            output_filename: Custom filename (optional)
+            output_dir: Custom output directory (optional)
+            
+        Returns:
+            str: Path to exported Excel file
+        """
+        try:
+            from datetime import datetime
+            
+            print("📊 Exporting bank ledger with reconciliation remarks...")
+            
+            # Get original bank ledger DataFrame
+            original_bank_df = bank_processor.bank_ledger_df.copy()
+            
+            # Remove any unnamed columns
+            original_bank_df = original_bank_df.loc[:, ~original_bank_df.columns.str.contains('^Unnamed')]
+            
+            # Get parsed data with loan IDs
+            bank_analysis = bank_processor.extract_bank_ledger_data()
+            if bank_analysis['status'] != 'success':
+                raise Exception("Could not extract bank ledger data")
+            
+            parsed_df = bank_analysis['parsed_data']['dataframe'].copy()
+            
+            # Get reconciliation matches
+            matches_df = reconciliation_data.get('merged_pivot_data')
+            if matches_df is None or matches_df.empty:
+                raise Exception("No reconciliation data available")
+            
+            # Create mapping from loan_id to reconciliation status and difference
+            recon_map = {}
+            for _, row in matches_df.iterrows():
+                loan_id = row.get('loan_id')
+                if loan_id:
+                    status = row.get('reconciliation_status', row.get('status', 'Unknown'))
+                    difference = row.get('amount_difference', 0)
+                    
+                    # Create remarks based on status
+                    if 'MATCHED' in str(status):
+                        if 'Group Payment' in str(status):
+                            remarks = f"✓ MATCHED - {status}"
+                        elif 'Credit/Debit' in str(status) or 'Phase 3' in str(status):
+                            remarks = f"✓ MATCHED - {status}"
+                        else:
+                            remarks = "✓ MATCHED"
+                    elif 'MISMATCH' in str(status):
+                        remarks = f"✗ MISMATCH"
+                    else:
+                        remarks = str(status)
+                    
+                    recon_map[loan_id] = {
+                        'remarks': remarks,
+                        'difference': difference
+                    }
+            
+            # Add Difference and Remarks columns to original bank ledger
+            difference_col = []
+            remarks_col = []
+            
+            for idx, row in original_bank_df.iterrows():
+                # Try to get loan_id from parsed data at same index
+                if idx < len(parsed_df):
+                    parsed_row = parsed_df.iloc[idx]
+                    loan_id = parsed_row.get('loan_id') if parsed_row.get('loan_id_valid', False) else None
+                    
+                    if loan_id and loan_id in recon_map:
+                        difference_col.append(recon_map[loan_id]['difference'])
+                        remarks_col.append(recon_map[loan_id]['remarks'])
+                    else:
+                        difference_col.append("")
+                        remarks_col.append("")  # Empty for non-reconciled entries
+                else:
+                    difference_col.append("")
+                    remarks_col.append("")
+            
+            # Add new columns to DataFrame
+            original_bank_df['Difference'] = difference_col
+            original_bank_df['Remarks'] = remarks_col
+            
+            # Prepare filename
+            if output_filename is None:
+                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                output_filename = f'Bank_Ledger_with_Remarks_{timestamp}.xlsx'
+            
+            # Determine output directory
+            if output_dir:
+                export_dir = output_dir
+            else:
+                export_dir = self.excel_exporter.output_dir
+            
+            os.makedirs(export_dir, exist_ok=True)
+            output_path = os.path.join(export_dir, output_filename)
+            
+            # Export to Excel with formatting
+            with pd.ExcelWriter(output_path, engine='xlsxwriter') as writer:
+                original_bank_df.to_excel(writer, sheet_name='Bank_Ledger', index=False)
+                
+                workbook = writer.book
+                worksheet = writer.sheets['Bank_Ledger']
+                
+                # Define formats
+                header_format = workbook.add_format({
+                    'bold': True,
+                    'text_wrap': True,
+                    'valign': 'top',
+                    'bg_color': '#4472C4',
+                    'font_color': 'white',
+                    'border': 1
+                })
+                
+                matched_format = workbook.add_format({'bg_color': '#C6EFCE'})  # Light green
+                unmatched_format = workbook.add_format({'bg_color': '#FFC7CE'})  # Light red
+                
+                # Write headers
+                for col_num, value in enumerate(original_bank_df.columns.values):
+                    worksheet.write(0, col_num, value, header_format)
+                
+                # Add autofilter to headers
+                worksheet.autofilter(0, 0, len(original_bank_df), len(original_bank_df.columns) - 1)
+                
+                # Auto-adjust column widths
+                for idx, col in enumerate(original_bank_df.columns):
+                    series = original_bank_df[col]
+                    max_len = max(
+                        series.astype(str).apply(len).max(),
+                        len(str(series.name))
+                    ) + 2
+                    worksheet.set_column(idx, idx, min(max_len, 50))
+                
+                # Apply conditional formatting to ENTIRE ROW based on Remarks column
+                remarks_col_idx = original_bank_df.columns.get_loc('Remarks')
+                num_cols = len(original_bank_df.columns)
+                
+                # Green for matched rows - apply to all columns
+                for col_idx in range(num_cols):
+                    worksheet.conditional_format(1, col_idx, len(original_bank_df), col_idx, {
+                        'type': 'formula',
+                        'criteria': f'=ISNUMBER(SEARCH("✓",$' + chr(65 + remarks_col_idx) + '2))',
+                        'format': matched_format
+                    })
+                
+                # Red for mismatched rows - apply to all columns
+                for col_idx in range(num_cols):
+                    worksheet.conditional_format(1, col_idx, len(original_bank_df), col_idx, {
+                        'type': 'formula',
+                        'criteria': f'=ISNUMBER(SEARCH("✗",$' + chr(65 + remarks_col_idx) + '2))',
+                        'format': unmatched_format
+                    })
+            
+            print(f"✅ Bank ledger with remarks exported to: {output_path}")
+            return output_path
+            
+        except Exception as e:
+            print(f"❌ Error exporting bank ledger: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return None
+    
     def create_input_template(self, template_type: str = 'reconciliation', output_dir: str = None) -> str:
         """
         Create input template files

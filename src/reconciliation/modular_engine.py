@@ -958,6 +958,40 @@ class ModularReconciliationEngine:
         """Create input template files"""
         return self.export_manager.create_input_template(template_type, output_dir)
     
+    def export_bank_ledger_with_reconciliation(self, output_filename: str = None, output_dir: str = None) -> str:
+        """
+        Export bank ledger in original format with reconciliation results
+        Adds columns: Credit (QR Collected), Debit (System Required), Difference, Remarks
+        Highlights unmatched entries with red background
+        
+        Args:
+            output_filename: Custom filename (optional)
+            output_dir: Custom output directory (optional)
+            
+        Returns:
+            str: Path to exported Excel file
+        """
+        print("🏦 Preparing bank ledger export with reconciliation results...")
+        
+        # Run reconciliation if not already done
+        reconciliation_result = self.merge_pivot_tables_comparison(include_stage2=True, include_phase3=True)
+        
+        if reconciliation_result.get('status') != 'success':
+            print("❌ Reconciliation failed, cannot export")
+            return None
+        
+        # Initialize export manager
+        from export_manager import ExportManager
+        export_manager = ExportManager(output_dir)
+        
+        # Export using new bank ledger format
+        return export_manager.export_bank_ledger_with_reconciliation(
+            bank_processor=self.bank_processor,
+            reconciliation_data=reconciliation_result,
+            output_filename=output_filename,
+            output_dir=output_dir
+        )
+    
     # Convenience Methods for UI Integration
     def get_processor_status(self):
         """Get status of all processors"""

@@ -290,3 +290,45 @@ class BankLedgerProcessor:
             result['debug_info']['error_message'] = f"Error creating pivot table: {str(e)}"
             
         return result
+    
+    def update_raw_entries_with_matches(self, matches_df: pd.DataFrame):
+        """
+        Update raw bank ledger entries with matching information from reconciliation
+        
+        Args:
+            matches_df: DataFrame with matching information containing:
+                - loan_id
+                - system_amount
+                - qr_amount
+                - difference
+                - status
+        """
+        try:
+            # Get parsed entries with loan IDs
+            bank_analysis = self.extract_bank_ledger_data()
+            if bank_analysis['status'] != 'success':
+                return False
+                
+            parsed_df = bank_analysis['parsed_data']['dataframe']
+            
+            # Merge matching info with parsed entries using loan_id
+            merged = pd.merge(
+                parsed_df,
+                matches_df[['loan_id', 'system_amount', 'qr_amount', 'difference', 'status']],
+                on='loan_id',
+                how='left'
+            )
+            
+            # Update original DataFrame with matching info
+            merged = merged[merged['loan_id_valid'] == True]  # Only update valid loan IDs
+            
+            self.bank_ledger_df.loc[merged.index, 'system_amount'] = merged['system_amount']
+            self.bank_ledger_df.loc[merged.index, 'qr_amount'] = merged['qr_amount']
+            self.bank_ledger_df.loc[merged.index, 'difference'] = merged['difference']
+            self.bank_ledger_df.loc[merged.index, 'match_status'] = merged['status']
+            
+            return True
+            
+        except Exception as e:
+            print(f"Error updating raw entries: {str(e)}")
+            return False

@@ -580,8 +580,120 @@ class BankReconciliationUI:
             if not file_path:
                 return
             
-            # Export logic...
-            print("Exporting results...")
+            # Show export options dialog
+            export_dialog = tk.Toplevel(self.root)
+            export_dialog.title("Export Options")
+            export_dialog.geometry("400x200")
+            export_dialog.transient(self.root)
+            export_dialog.grab_set()
+            
+            # Center the dialog
+            export_dialog.update_idletasks()
+            x = (export_dialog.winfo_screenwidth() // 2) - (export_dialog.winfo_width() // 2)
+            y = (export_dialog.winfo_screenheight() // 2) - (export_dialog.winfo_height() // 2)
+            export_dialog.geometry(f"+{x}+{y}")
+            
+            tk.Label(
+                export_dialog, 
+                text="Select Export Format:", 
+                font=("Arial", 12, "bold")
+            ).pack(pady=20)
+            
+            export_format = tk.StringVar(value="reconciliation")
+            
+            tk.Radiobutton(
+                export_dialog,
+                text="📊 Standard Reconciliation Report (Pivoted)",
+                variable=export_format,
+                value="reconciliation",
+                font=("Arial", 10)
+            ).pack(anchor="w", padx=40, pady=5)
+            
+            tk.Radiobutton(
+                export_dialog,
+                text="🏦 Bank Ledger Format (with Credit/Debit/Remarks)",
+                variable=export_format,
+                value="bank_ledger",
+                font=("Arial", 10)
+            ).pack(anchor="w", padx=40, pady=5)
+            
+            def do_export():
+                export_dialog.destroy()
+                selected_format = export_format.get()
+                
+                try:
+                    if selected_format == "bank_ledger":
+                        # Export in bank ledger format
+                        print("🏦 Exporting in bank ledger format...")
+                        if hasattr(self, 'current_recon_engine') and self.current_recon_engine:
+                            # Use the new bank ledger export
+                            from reconciliation.exporters.export_manager import ExportManager
+                            export_mgr = ExportManager()
+                            
+                            export_path = export_mgr.export_bank_ledger_with_reconciliation(
+                                bank_processor=self.current_recon_engine.bank_processor,
+                                reconciliation_data=results,
+                                output_filename=os.path.basename(file_path),
+                                output_dir=os.path.dirname(file_path)
+                            )
+                            
+                            if export_path:
+                                messagebox.showinfo(
+                                    "Export Successful", 
+                                    f"Bank ledger with reconciliation results exported successfully!\n\n"
+                                    f"File: {export_path}\n\n"
+                                    f"Format includes:\n"
+                                    f"• All original bank columns\n"
+                                    f"• Credit (QR Collected)\n"
+                                    f"• Debit (System Required)\n"
+                                    f"• Difference\n"
+                                    f"• Remarks\n\n"
+                                    f"✗ Unmatched entries highlighted in RED"
+                                )
+                            else:
+                                messagebox.showerror("Export Error", "Failed to export bank ledger format")
+                        else:
+                            messagebox.showerror("Export Error", "Reconciliation engine not available")
+                    else:
+                        # Export standard reconciliation report
+                        print("📊 Exporting standard reconciliation report...")
+                        merged_data = results.get('merged_pivot_data')
+                        
+                        if merged_data is not None and not merged_data.empty:
+                            # Export to Excel
+                            with pd.ExcelWriter(file_path, engine='xlsxwriter') as writer:
+                                merged_data.to_excel(writer, sheet_name='Reconciliation', index=False)
+                                
+                                # Add summary sheet if available
+                                if 'reconciliation_summary' in results:
+                                    summary = results['reconciliation_summary']
+                                    summary_df = pd.DataFrame(list(summary.items()), columns=['Metric', 'Value'])
+                                    summary_df.to_excel(writer, sheet_name='Summary', index=False)
+                            
+                            messagebox.showinfo(
+                                "Export Successful", 
+                                f"Reconciliation results exported successfully to:\n{file_path}"
+                            )
+                        else:
+                            messagebox.showerror("Export Error", "No data available to export")
+                            
+                except Exception as e:
+                    error_msg = f"Error during export: {str(e)}"
+                    logging.error(error_msg, exc_info=True)
+                    messagebox.showerror("Export Error", error_msg)
+                    import traceback
+                    traceback.print_exc()
+            
+            tk.Button(
+                export_dialog,
+                text="Export",
+                command=do_export,
+                font=("Arial", 10, "bold"),
+                bg="#4CAF50",
+                fg="white",
+                padx=20,
+                pady=5
+            ).pack(pady=20)
             
         except Exception as e:
             error_msg = f"Error exporting results: {str(e)}"
@@ -712,104 +824,57 @@ class BankReconciliationUI:
             error_label.pack(pady=5)
     
     def _export_simple_results(self, results):
-        """Export simplified reconciliation results to Excel"""
+        """Export bank ledger with reconciliation remarks to Excel"""
         try:
-            # Get file path
+            if not self.current_recon_engine:
+                messagebox.showerror("Error", "No reconciliation engine available")
+                return
+            
+            # Get file path from user
             file_path = filedialog.asksaveasfilename(
                 defaultextension=".xlsx",
                 filetypes=[("Excel files", "*.xlsx"), ("All files", "*.*")],
-                title="Save Simplified Reconciliation Report"
+                title="Save Bank Ledger with Reconciliation Remarks"
             )
             
             if not file_path:
                 return
             
-            print(f"DEBUG: Export called with results keys: {list(results.keys()) if results else 'None'}")
+            # Get output directory and filename from path
+            output_dir = os.path.dirname(file_path)
+            output_filename = os.path.basename(file_path)
             
-            # Get the main reconciliation data
-            main_data = None
-            if results:
-                # Try multiple possible keys for the main data
-                for key in ['simplified_report', 'merged_pivot_data', 'comparison_data', 'final_data']:
-                    if key in results and results[key] is not None:
-                        main_data = results[key]
-                        print(f"DEBUG: Using data from key '{key}', shape: {main_data.shape if hasattr(main_data, 'shape') else 'unknown'}")
-                        break
+            # Export bank ledger with remarks using the engine's method
+            exported_path = self.current_recon_engine.export_manager.export_bank_ledger_with_reconciliation(
+                bank_processor=self.current_recon_engine.bank_processor,
+                reconciliation_data=results,
+                output_filename=output_filename,
+                output_dir=output_dir
+            )
             
-            summary = results.get('reconciliation_summary', {}) if results else {}
-            
-            # Check if we have any data to export
-            if main_data is None:
-                messagebox.showwarning("Warning", "No reconciliation data available to export")
-                return
+            if exported_path:
+                # Get summary for success message
+                summary = results.get('reconciliation_summary', {})
+                total_records = summary.get('total_unique_loans', 0)
+                total_matches = summary.get('total_matches', 0)
+                match_rate = summary.get('match_percentage', 0)
                 
-            with pd.ExcelWriter(file_path, engine='openpyxl') as writer:
-                # Export main data
-                if hasattr(main_data, 'empty') and not main_data.empty:
-                    # Find status column
-                    status_column = None
-                    for col in ['status', 'reconciliation_status']:
-                        if col in main_data.columns:
-                            status_column = col
-                            break
-                    
-                    if status_column:
-                        # Separate by status
-                        matched_df = main_data[main_data[status_column].str.contains('MATCHED', na=False)]
-                        mismatch_df = main_data[main_data[status_column].str.contains('MISMATCH', na=False)]
-                        
-                        # Export each category
-                        if not matched_df.empty:
-                            matched_df.to_excel(writer, sheet_name='Matched_Records', index=False)
-                        if not mismatch_df.empty:
-                            mismatch_df.to_excel(writer, sheet_name='Mismatched_Records', index=False)
-                    else:
-                        # Export all data as single sheet
-                        main_data.to_excel(writer, sheet_name='All_Records', index=False)
-                else:
-                    # Convert to DataFrame if needed
-                    if hasattr(main_data, 'to_dict'):
-                        pd.DataFrame([main_data.to_dict()]).to_excel(writer, sheet_name='Data', index=False)
-                    else:
-                        pd.DataFrame([{'Message': 'No data available'}]).to_excel(writer, sheet_name='Data', index=False)
+                success_msg = f"📊 Bank Ledger Exported Successfully!\n\n"
+                success_msg += f"📋 Summary:\n"
+                success_msg += f"   • Total Bank Entries: {total_records:,}\n"
+                success_msg += f"   • Matched Entries: {total_matches:,}\n"
+                success_msg += f"   • Match Rate: {match_rate:.2f}%\n\n"
+                success_msg += f"✨ Export Details:\n"
+                success_msg += f"   • All original bank ledger columns preserved\n"
+                success_msg += f"   • Remarks column added with match status\n"
+                success_msg += f"   • Green highlighting for matched entries\n"
+                success_msg += f"   • Red highlighting for unmatched entries\n\n"
+                success_msg += f"📁 File: {file_path}"
                 
-                # Create a summary sheet
-                summary_data = {
-                    'Metric': ['Total Records', 'Perfect Matches', 'Minor Matches', 'Total Matches', 'Amount Mismatches', 'Match Rate %'],
-                    'Value': [
-                        summary.get('total_unique_loans', 0),
-                        summary.get('perfect_matches', 0),
-                        summary.get('minor_matches', 0),
-                        summary.get('total_matches', 0),
-                        summary.get('amount_mismatches', 0),
-                        f"{summary.get('match_percentage', 0):.1f}%"
-                    ]
-                }
-                summary_df = pd.DataFrame(summary_data)
-                summary_df.to_excel(writer, sheet_name='Summary', index=False)
-            
-            # Apply clean formatting to make filters and colors visible
-            print(f"🎨 Applying clean formatting to: {file_path}")
-            self._apply_clean_formatting(file_path)
-            
-            # Show success message with details
-            total_records = summary.get('total_unique_loans', len(main_data) if main_data is not None else 0)
-            total_matches = summary.get('total_matches', 0)
-            match_rate = summary.get('match_percentage', 0)
-            
-            success_msg = f"📊 Reconciliation Report Exported Successfully!\n\n"
-            success_msg += f"📋 Summary:\n"
-            success_msg += f"   • Total Records: {total_records:,}\n"
-            success_msg += f"   • Matched Records: {total_matches:,}\n"
-            success_msg += f"   • Match Rate: {match_rate:.2f}%\n\n"
-            success_msg += f"✨ Features:\n"
-            success_msg += f"   • Separate sheets for matched/mismatched\n"
-            success_msg += f"   • Auto-filters enabled\n"
-            success_msg += f"   • Basic color coding\n\n"
-            success_msg += f"📁 File: {file_path}"
-            
-            messagebox.showinfo("Export Successful", success_msg)
-            print(f"✅ Export successful: {file_path}")
+                messagebox.showinfo("Export Successful", success_msg)
+                print(f"✅ Export successful: {file_path}")
+            else:
+                messagebox.showerror("Export Failed", "Could not export bank ledger")
             
         except Exception as e:
             error_msg = f"Error exporting results: {str(e)}"
