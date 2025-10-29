@@ -261,13 +261,14 @@ class ExportManager:
             os.makedirs(export_dir, exist_ok=True)
             output_path = os.path.join(export_dir, output_filename)
             
-            # Export to Excel with formatting
+            # Export to Excel with formatting and include Matched / Mismatched sheets
             with pd.ExcelWriter(output_path, engine='xlsxwriter') as writer:
+                # Sheet 1: Bank Ledger (original with Difference & Remarks)
                 original_bank_df.to_excel(writer, sheet_name='Bank_Ledger', index=False)
-                
+
                 workbook = writer.book
-                worksheet = writer.sheets['Bank_Ledger']
-                
+                ledger_ws = writer.sheets['Bank_Ledger']
+
                 # Define formats
                 header_format = workbook.add_format({
                     'bold': True,
@@ -277,45 +278,173 @@ class ExportManager:
                     'font_color': 'white',
                     'border': 1
                 })
-                
+
                 matched_format = workbook.add_format({'bg_color': '#C6EFCE'})  # Light green
                 unmatched_format = workbook.add_format({'bg_color': '#FFC7CE'})  # Light red
-                
-                # Write headers
+
+                # Write headers and autofilter for ledger
                 for col_num, value in enumerate(original_bank_df.columns.values):
-                    worksheet.write(0, col_num, value, header_format)
-                
-                # Add autofilter to headers
-                worksheet.autofilter(0, 0, len(original_bank_df), len(original_bank_df.columns) - 1)
-                
-                # Auto-adjust column widths
+                    ledger_ws.write(0, col_num, value, header_format)
+
+                ledger_ws.autofilter(0, 0, len(original_bank_df), len(original_bank_df.columns) - 1)
+
+                # Auto-adjust column widths for ledger
                 for idx, col in enumerate(original_bank_df.columns):
                     series = original_bank_df[col]
-                    max_len = max(
-                        series.astype(str).apply(len).max(),
-                        len(str(series.name))
-                    ) + 2
-                    worksheet.set_column(idx, idx, min(max_len, 50))
-                
-                # Apply conditional formatting to ENTIRE ROW based on Remarks column
-                remarks_col_idx = original_bank_df.columns.get_loc('Remarks')
-                num_cols = len(original_bank_df.columns)
-                
-                # Green for matched rows - apply to all columns
-                for col_idx in range(num_cols):
-                    worksheet.conditional_format(1, col_idx, len(original_bank_df), col_idx, {
-                        'type': 'formula',
-                        'criteria': f'=ISNUMBER(SEARCH("✓",$' + chr(65 + remarks_col_idx) + '2))',
-                        'format': matched_format
-                    })
-                
-                # Red for mismatched rows - apply to all columns
-                for col_idx in range(num_cols):
-                    worksheet.conditional_format(1, col_idx, len(original_bank_df), col_idx, {
-                        'type': 'formula',
-                        'criteria': f'=ISNUMBER(SEARCH("✗",$' + chr(65 + remarks_col_idx) + '2))',
-                        'format': unmatched_format
-                    })
+                    try:
+                        max_len = max(
+                            series.astype(str).apply(len).max(),
+                            len(str(series.name))
+                        ) + 2
+                    except Exception:
+                        max_len = min(20, len(str(series.name)) + 2)
+                    ledger_ws.set_column(idx, idx, min(max_len, 50))
+
+                # Apply conditional formatting to ENTIRE ROW based on Remarks column if present
+                if 'Remarks' in original_bank_df.columns:
+                    remarks_col_idx = original_bank_df.columns.get_loc('Remarks')
+                    num_cols = len(original_bank_df.columns)
+
+                    # Green for matched rows - apply to all columns
+                    for col_idx in range(num_cols):
+                        ledger_ws.conditional_format(1, col_idx, len(original_bank_df), col_idx, {
+                            'type': 'formula',
+                            'criteria': f'=ISNUMBER(SEARCH("✓",$' + chr(65 + remarks_col_idx) + '2))',
+                            'format': matched_format
+                        })
+
+                    # Red for mismatched rows - apply to all columns
+                    for col_idx in range(num_cols):
+                        ledger_ws.conditional_format(1, col_idx, len(original_bank_df), col_idx, {
+                            'type': 'formula',
+                            'criteria': f'=ISNUMBER(SEARCH("✗",$' + chr(65 + remarks_col_idx) + '2))',
+                            'format': unmatched_format
+                        })
+
+                # Prepare Matched and Mismatched sheets from reconciliation data if available
+                matches_df = matches_df if 'matches_df' in locals() else reconciliation_data.get('merged_pivot_data')
+                if matches_df is None or matches_df.empty:
+                    # try alternate key names
+                    matches_df = reconciliation_data.get('merged_data') or reconciliation_data.get('merged')
+
+                try:
+                    if matches_df is not None and not matches_df.empty:
+                        # Determine status column name
+                        status_col = None
+                        for candidate in ['reconciliation_status', 'status', 'recon_status']:
+                            if candidate in matches_df.columns:
+                                status_col = candidate
+                                break
+
+                        # Normalize status values to string upper for filtering
+                        if status_col is not None:
+                            status_series = matches_df[status_col].fillna('').astype(str).str.upper()
+                        else:
+                            status_series = pd.Series([''] * len(matches_df))
+
+                        matched_df = matches_df[status_series.str.contains('MATCHED', na=False)].copy()
+                        mismatched_df = matches_df[status_series.str.contains('MISMATCH', na=False)].copy()
+
+                        # Define the required columns for matched/mismatched sheets
+                        required_cols = ['loan_id', 'customer_name', 'group_id', 'branch', 'system_entry', 'qr_collection', 'difference', 'status']
+                        
+                        # Helper function to prepare sheet with required columns
+                        def prepare_sheet_data(df, status_col):
+                            if df.empty:
+                                return pd.DataFrame(columns=required_cols)
+                            
+                            result_df = pd.DataFrame()
+                            
+                            # Map columns - try different possible names
+                            col_mapping = {
+                                'loan_id': ['loan_id', 'loanid', 'id'],
+                                'customer_name': ['customer_name', 'name', 'member_name'],
+                                'group_id': ['group_id', 'group', 'group_name'],
+                                'branch': ['branch', 'branch_name'],
+                                'system_entry': ['system_amount', 'system_entry', 'bank_amount'],
+                                'qr_collection': ['qr_amount', 'qr_collection', 'collection'],
+                                'difference': ['amount_difference', 'difference', 'diff'],
+                                'status': [status_col] if status_col else ['reconciliation_status', 'status']
+                            }
+                            
+                            for target_col, possible_names in col_mapping.items():
+                                found = False
+                                for col_name in possible_names:
+                                    if col_name in df.columns:
+                                        result_df[target_col] = df[col_name]
+                                        found = True
+                                        break
+                                if not found:
+                                    result_df[target_col] = ''
+                            
+                            return result_df
+
+                        # Prepare matched and mismatched data
+                        matched_export_df = prepare_sheet_data(matched_df, status_col)
+                        mismatched_export_df = prepare_sheet_data(mismatched_df, status_col)
+
+                        # Sheet 2: Matched (with green background)
+                        if not matched_export_df.empty:
+                            matched_export_df.to_excel(writer, sheet_name='Matched', index=False)
+                            matched_ws = writer.sheets['Matched']
+                            
+                            # Write headers
+                            for col_num, value in enumerate(matched_export_df.columns.values):
+                                matched_ws.write(0, col_num, value, header_format)
+                            
+                            # Apply green background to all data cells
+                            for row_num in range(1, len(matched_export_df) + 1):
+                                for col_num in range(len(matched_export_df.columns)):
+                                    matched_ws.write(row_num, col_num, matched_export_df.iloc[row_num - 1, col_num], matched_format)
+                            
+                            # Add autofilter
+                            matched_ws.autofilter(0, 0, len(matched_export_df), len(matched_export_df.columns) - 1)
+                            
+                            # Auto-adjust column widths
+                            for idx, col in enumerate(matched_export_df.columns):
+                                try:
+                                    max_len = max(matched_export_df[col].astype(str).apply(len).max(), len(str(col))) + 2
+                                except Exception:
+                                    max_len = min(20, len(str(col)) + 2)
+                                matched_ws.set_column(idx, idx, min(max_len, 50))
+                        else:
+                            # Empty matched sheet
+                            empty_df = pd.DataFrame({'Note': ['No matched records available']})
+                            empty_df.to_excel(writer, sheet_name='Matched', index=False)
+
+                        # Sheet 3: Mismatched (with red background)
+                        if not mismatched_export_df.empty:
+                            mismatched_export_df.to_excel(writer, sheet_name='Mismatched', index=False)
+                            mismatched_ws = writer.sheets['Mismatched']
+                            
+                            # Write headers
+                            for col_num, value in enumerate(mismatched_export_df.columns.values):
+                                mismatched_ws.write(0, col_num, value, header_format)
+                            
+                            # Apply red background to all data cells
+                            for row_num in range(1, len(mismatched_export_df) + 1):
+                                for col_num in range(len(mismatched_export_df.columns)):
+                                    mismatched_ws.write(row_num, col_num, mismatched_export_df.iloc[row_num - 1, col_num], unmatched_format)
+                            
+                            # Add autofilter
+                            mismatched_ws.autofilter(0, 0, len(mismatched_export_df), len(mismatched_export_df.columns) - 1)
+                            
+                            # Auto-adjust column widths
+                            for idx, col in enumerate(mismatched_export_df.columns):
+                                try:
+                                    max_len = max(mismatched_export_df[col].astype(str).apply(len).max(), len(str(col))) + 2
+                                except Exception:
+                                    max_len = min(20, len(str(col)) + 2)
+                                mismatched_ws.set_column(idx, idx, min(max_len, 50))
+                        else:
+                            # Empty mismatched sheet
+                            empty_df = pd.DataFrame({'Note': ['No mismatched records available']})
+                            empty_df.to_excel(writer, sheet_name='Mismatched', index=False)
+
+                except Exception as e:
+                    print(f"⚠️ Could not generate matched/mismatched sheets: {e}")
+                    import traceback
+                    traceback.print_exc()
             
             print(f"✅ Bank ledger with remarks exported to: {output_path}")
             return output_path

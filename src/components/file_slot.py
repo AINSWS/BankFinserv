@@ -120,7 +120,21 @@ class FileSlot:
             padx=20,
             pady=8
         )
-        browse_btn.pack(side="left", padx=(0, 10))
+        browse_btn.pack(side="left", padx=(0, 5))
+        
+        # Download button - disabled until file is uploaded
+        download_style = UITheme.get_button_style("secondary")
+        template_btn = tk.Button(
+            buttons_frame,
+            text="📥 Download",
+            command=self._download_template,
+            font=UITheme.get_font_config("body"),
+            **download_style,
+            padx=15,
+            pady=8,
+            state="disabled"
+        )
+        template_btn.pack(side="left", padx=(0, 5))
         
         # Clear button
         clear_style = UITheme.get_button_style("danger")
@@ -155,6 +169,7 @@ class FileSlot:
             'file_icon': file_icon,
             'drop_text': drop_text,
             'browse_btn': browse_btn,
+            'template_btn': template_btn,
             'clear_btn': clear_btn,
             'info_label': info_label
         }
@@ -257,12 +272,66 @@ class FileSlot:
             fg=UITheme.TEXT_PRIMARY
         )
         
+        # Update button states
         self.widgets['clear_btn'].configure(state="normal")
+        self.widgets['template_btn'].configure(state="normal")  # Enable download button when file is loaded
         
         # Show file info
         info_text = f"📄 {self.file_data['size']} • {datetime.now().strftime('%H:%M')}"
         self.widgets['info_label'].configure(text=info_text)
         self.widgets['info_label'].pack(fill="x", padx=10, pady=(0, 8))
+    
+    def _download_template(self):
+        """Download a template file based on the currently loaded file or provide a sample"""
+        import pandas as pd
+        import os
+        
+        # Ask user where to save the template
+        config = self.FILE_CONFIGS.get(self.slot_number, {})
+        file_name = config.get('name', f"File {self.slot_number}").replace('📋 ', '').replace(':', '')
+        default_filename = f"{file_name.replace(' ', '_')}_Template.xlsx"
+        
+        file_path = filedialog.asksaveasfilename(
+            defaultextension=".xlsx",
+            initialfile=default_filename,
+            filetypes=[("Excel files", "*.xlsx"), ("All files", "*.*")],
+            title=f"Save {file_name} Template"
+        )
+        
+        if not file_path:
+            return
+        
+        try:
+            # Download the entire uploaded file for verification
+            if self.file_data and self.file_data.get('data') is not None:
+                # Export the entire uploaded file
+                df = self.file_data['data']
+                
+                # Save the complete file
+                df.to_excel(file_path, index=False, engine='openpyxl')
+                
+                messagebox.showinfo(
+                    "File Downloaded",
+                    f"✅ Complete file downloaded successfully!\n\n"
+                    f"📁 Location: {file_path}\n\n"
+                    f"📊 Total Rows: {len(df):,}\n"
+                    f"📋 Total Columns: {len(df.columns)}\n\n"
+                    f"💡 Use this to verify you uploaded the correct file format.\n"
+                    f"Check column names and data structure match your requirements."
+                )
+            else:
+                # This shouldn't happen as button is disabled, but safety check
+                messagebox.showwarning(
+                    "No File Uploaded",
+                    "Please upload a file first before downloading.\n\n"
+                    "The download button will be enabled after you upload a file."
+                )
+        
+        except Exception as e:
+            messagebox.showerror(
+                "Template Error",
+                f"Failed to create template:\n{str(e)}"
+            )
     
     def _clear_file(self):
         """Clear the loaded file"""
@@ -272,6 +341,7 @@ class FileSlot:
         self.widgets['status_label'].configure(text="⚪ Empty", fg=UITheme.TEXT_SECONDARY)
         self._set_drag_state(False)
         self.widgets['clear_btn'].configure(state="disabled")
+        self.widgets['template_btn'].configure(state="disabled")  # Disable download button when file is cleared
         self.widgets['info_label'].pack_forget()
         
         # Notify parent

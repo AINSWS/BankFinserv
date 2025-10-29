@@ -9,7 +9,7 @@
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application.
-AppId={{YOUR-GUID-HERE}}
+AppId={{8F3D2E1A-9B4C-4D5E-A6F7-1C2B3D4E5F6A}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppPublisher={#MyAppPublisher}
@@ -19,17 +19,12 @@ AppUpdatesURL={#MyAppURL}
 DefaultDirName={autopf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 AllowNoIcons=yes
-; Uncomment the following line to run in non administrative install mode
-;PrivilegesRequired=lowest
+PrivilegesRequired=lowest
 OutputDir=installers
 OutputBaseFilename=BankReconciliationTool_Setup_v{#MyAppVersion}
-SetupIconFile=assets\logo.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
-; Modern wizard images (optional - create these)
-;WizardImageFile=assets\installer_banner.bmp
-;WizardSmallImageFile=assets\installer_small.bmp
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"

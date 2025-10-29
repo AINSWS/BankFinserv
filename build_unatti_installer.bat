@@ -1,11 +1,11 @@
 @echo off
-title Unatti Bank Reconciliation Tool - Build Script
+title Unnatti Bank Reconciliation Tool - Build Script
 color 0A
 
 echo ================================================================
-echo    UNATTI BANK RECONCILIATION TOOL - BUILD SCRIPT
+echo    UNNATTI BANK RECONCILIATION TOOL - BUILD SCRIPT
 echo    Developed by: Neuro Spark Work Solutions
-echo    Client: Unatti Finserv
+echo    Client: Unnatti Finserv
 echo ================================================================
 echo.
 
@@ -45,7 +45,7 @@ if %ERRORLEVEL% NEQ 0 (
 echo ✓ Executable created successfully
 
 echo.
-echo [Step 3] Building Unatti installer...
+echo [Step 3] Building Unnatti installer...
 echo Using Inno Setup to create professional installer...
 
 REM Build the installer using Inno Setup
@@ -69,20 +69,20 @@ echo ================================================================
 echo.
 echo 📁 FILES CREATED:
 echo    Executable: dist\BankReconciliationTool\BankReconciliationTool.exe
-echo    Installer:  installer_output\Unatti_BankReconciliationTool_Setup_v1.0.0.exe
+echo    Installer:  installer_output\Unnatti_BankReconciliationTool_Setup_v1.0.0.exe
 echo.
 echo 🚀 FEATURES:
 echo    ✓ Fast startup (2-3 seconds with --onedir)
 echo    ✓ Professional Windows installer
-echo    ✓ Unatti branding and customization
+echo    ✓ Unnatti branding and customization
 echo    ✓ Start menu integration
 echo    ✓ Desktop shortcut option
 echo    ✓ Proper uninstall process
 echo.
 echo 📧 SUPPORT: vinod@neurosparkworks.com
-echo 🏢 CLIENT: Unatti Finserv
+echo 🏢 CLIENT: Unnatti Finserv
 echo 💻 DEVELOPER: Neuro Spark Work Solutions
 echo.
-echo The installer is ready for distribution to Unatti Finserv!
+echo The installer is ready for distribution to Unnatti Finserv!
 echo.
 pause

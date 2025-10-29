@@ -474,6 +474,12 @@
   ('colorsys',
    'C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\colorsys.py',
    'PYMODULE'),
+  ('components',
+   'E:\\BANK RECON\\BankReconsilation\\src\\components\\__init__.py',
+   'PYMODULE'),
+  ('components.file_slot',
+   'E:\\BANK RECON\\BankReconsilation\\src\\components\\file_slot.py',
+   'PYMODULE'),
   ('concurrent',
    'C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\concurrent\\__init__.py',
    'PYMODULE'),
@@ -518,6 +524,66 @@
    'PYMODULE'),
   ('datetime',
    'C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\datetime.py',
+   'PYMODULE'),
+  ('dateutil',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\dateutil\\__init__.py',
+   'PYMODULE'),
+  ('dateutil._common',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\dateutil\\_common.py',
+   'PYMODULE'),
+  ('dateutil._version',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\dateutil\\_version.py',
+   'PYMODULE'),
+  ('dateutil.easter',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\dateutil\\easter.py',
+   'PYMODULE'),
+  ('dateutil.parser',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\dateutil\\parser\\__init__.py',
+   'PYMODULE'),
+  ('dateutil.parser._parser',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\dateutil\\parser\\_parser.py',
+   'PYMODULE'),
+  ('dateutil.parser.isoparser',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\dateutil\\parser\\isoparser.py',
+   'PYMODULE'),
+  ('dateutil.relativedelta',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\dateutil\\relativedelta.py',
+   'PYMODULE'),
+  ('dateutil.rrule',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\dateutil\\rrule.py',
+   'PYMODULE'),
+  ('dateutil.tz',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\dateutil\\tz\\__init__.py',
+   'PYMODULE'),
+  ('dateutil.tz._common',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\dateutil\\tz\\_common.py',
+   'PYMODULE'),
+  ('dateutil.tz._factories',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\dateutil\\tz\\_factories.py',
+   'PYMODULE'),
+  ('dateutil.tz.tz',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\dateutil\\tz\\tz.py',
+   'PYMODULE'),
+  ('dateutil.tz.win',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\dateutil\\tz\\win.py',
+   'PYMODULE'),
+  ('dateutil.zoneinfo',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\dateutil\\zoneinfo\\__init__.py',
    'PYMODULE'),
   ('decimal',
    'C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\decimal.py',
@@ -602,6 +668,10 @@
   ('et_xmlfile.xmlfile',
    'E:\\BANK '
    'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\et_xmlfile\\xmlfile.py',
+   'PYMODULE'),
+  ('file_handlers', '-', 'PYMODULE'),
+  ('file_handlers.file_manager',
+   'E:\\BANK RECON\\BankReconsilation\\src\\file_handlers\\file_manager.py',
    'PYMODULE'),
   ('fileinput',
    'C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\fileinput.py',
@@ -1037,6 +1107,10 @@
   ('numpy.core._utils',
    'E:\\BANK '
    'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\numpy\\core\\_utils.py',
+   'PYMODULE'),
+  ('numpy.core.multiarray',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\numpy\\core\\multiarray.py',
    'PYMODULE'),
   ('numpy.ctypeslib',
    'E:\\BANK '
@@ -1621,6 +1695,10 @@
    'E:\\BANK '
    'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\openpyxl\\compat\\numbers.py',
    'PYMODULE'),
+  ('openpyxl.compat.product',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\openpyxl\\compat\\product.py',
+   'PYMODULE'),
   ('openpyxl.compat.strings',
    'E:\\BANK '
    'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\openpyxl\\compat\\strings.py',
@@ -1888,6 +1966,10 @@
   ('openpyxl.utils.cell',
    'E:\\BANK '
    'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\openpyxl\\utils\\cell.py',
+   'PYMODULE'),
+  ('openpyxl.utils.dataframe',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\openpyxl\\utils\\dataframe.py',
    'PYMODULE'),
   ('openpyxl.utils.datetime',
    'E:\\BANK '
@@ -2157,6 +2239,1138 @@
    'E:\\BANK '
    'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\packaging\\version.py',
    'PYMODULE'),
+  ('pandas',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\__init__.py',
+   'PYMODULE'),
+  ('pandas._config',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\_config\\__init__.py',
+   'PYMODULE'),
+  ('pandas._config.config',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\_config\\config.py',
+   'PYMODULE'),
+  ('pandas._config.dates',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\_config\\dates.py',
+   'PYMODULE'),
+  ('pandas._config.display',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\_config\\display.py',
+   'PYMODULE'),
+  ('pandas._config.localization',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\_config\\localization.py',
+   'PYMODULE'),
+  ('pandas._libs',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\_libs\\__init__.py',
+   'PYMODULE'),
+  ('pandas._libs.tslibs',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\_libs\\tslibs\\__init__.py',
+   'PYMODULE'),
+  ('pandas._libs.window',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\_libs\\window\\__init__.py',
+   'PYMODULE'),
+  ('pandas._testing',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\_testing\\__init__.py',
+   'PYMODULE'),
+  ('pandas._testing._io',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\_testing\\_io.py',
+   'PYMODULE'),
+  ('pandas._testing._warnings',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\_testing\\_warnings.py',
+   'PYMODULE'),
+  ('pandas._testing.asserters',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\_testing\\asserters.py',
+   'PYMODULE'),
+  ('pandas._testing.compat',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\_testing\\compat.py',
+   'PYMODULE'),
+  ('pandas._testing.contexts',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\_testing\\contexts.py',
+   'PYMODULE'),
+  ('pandas._typing',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\_typing.py',
+   'PYMODULE'),
+  ('pandas._version',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\_version.py',
+   'PYMODULE'),
+  ('pandas._version_meson',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\_version_meson.py',
+   'PYMODULE'),
+  ('pandas.api',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\api\\__init__.py',
+   'PYMODULE'),
+  ('pandas.api.extensions',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\api\\extensions\\__init__.py',
+   'PYMODULE'),
+  ('pandas.api.indexers',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\api\\indexers\\__init__.py',
+   'PYMODULE'),
+  ('pandas.api.interchange',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\api\\interchange\\__init__.py',
+   'PYMODULE'),
+  ('pandas.api.types',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\api\\types\\__init__.py',
+   'PYMODULE'),
+  ('pandas.api.typing',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\api\\typing\\__init__.py',
+   'PYMODULE'),
+  ('pandas.arrays',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\arrays\\__init__.py',
+   'PYMODULE'),
+  ('pandas.compat',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\compat\\__init__.py',
+   'PYMODULE'),
+  ('pandas.compat._constants',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\compat\\_constants.py',
+   'PYMODULE'),
+  ('pandas.compat._optional',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\compat\\_optional.py',
+   'PYMODULE'),
+  ('pandas.compat.compressors',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\compat\\compressors.py',
+   'PYMODULE'),
+  ('pandas.compat.numpy',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\compat\\numpy\\__init__.py',
+   'PYMODULE'),
+  ('pandas.compat.numpy.function',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\compat\\numpy\\function.py',
+   'PYMODULE'),
+  ('pandas.compat.pickle_compat',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\compat\\pickle_compat.py',
+   'PYMODULE'),
+  ('pandas.compat.pyarrow',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\compat\\pyarrow.py',
+   'PYMODULE'),
+  ('pandas.core',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\__init__.py',
+   'PYMODULE'),
+  ('pandas.core._numba',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\_numba\\__init__.py',
+   'PYMODULE'),
+  ('pandas.core._numba.executor',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\_numba\\executor.py',
+   'PYMODULE'),
+  ('pandas.core._numba.extensions',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\_numba\\extensions.py',
+   'PYMODULE'),
+  ('pandas.core._numba.kernels',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\_numba\\kernels\\__init__.py',
+   'PYMODULE'),
+  ('pandas.core._numba.kernels.mean_',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\_numba\\kernels\\mean_.py',
+   'PYMODULE'),
+  ('pandas.core._numba.kernels.min_max_',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\_numba\\kernels\\min_max_.py',
+   'PYMODULE'),
+  ('pandas.core._numba.kernels.shared',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\_numba\\kernels\\shared.py',
+   'PYMODULE'),
+  ('pandas.core._numba.kernels.sum_',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\_numba\\kernels\\sum_.py',
+   'PYMODULE'),
+  ('pandas.core._numba.kernels.var_',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\_numba\\kernels\\var_.py',
+   'PYMODULE'),
+  ('pandas.core.accessor',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\accessor.py',
+   'PYMODULE'),
+  ('pandas.core.algorithms',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\algorithms.py',
+   'PYMODULE'),
+  ('pandas.core.api',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\api.py',
+   'PYMODULE'),
+  ('pandas.core.apply',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\apply.py',
+   'PYMODULE'),
+  ('pandas.core.array_algos',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\array_algos\\__init__.py',
+   'PYMODULE'),
+  ('pandas.core.array_algos.datetimelike_accumulations',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\array_algos\\datetimelike_accumulations.py',
+   'PYMODULE'),
+  ('pandas.core.array_algos.masked_accumulations',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\array_algos\\masked_accumulations.py',
+   'PYMODULE'),
+  ('pandas.core.array_algos.masked_reductions',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\array_algos\\masked_reductions.py',
+   'PYMODULE'),
+  ('pandas.core.array_algos.putmask',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\array_algos\\putmask.py',
+   'PYMODULE'),
+  ('pandas.core.array_algos.quantile',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\array_algos\\quantile.py',
+   'PYMODULE'),
+  ('pandas.core.array_algos.replace',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\array_algos\\replace.py',
+   'PYMODULE'),
+  ('pandas.core.array_algos.take',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\array_algos\\take.py',
+   'PYMODULE'),
+  ('pandas.core.array_algos.transforms',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\array_algos\\transforms.py',
+   'PYMODULE'),
+  ('pandas.core.arraylike',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\arraylike.py',
+   'PYMODULE'),
+  ('pandas.core.arrays',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\arrays\\__init__.py',
+   'PYMODULE'),
+  ('pandas.core.arrays._arrow_string_mixins',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\arrays\\_arrow_string_mixins.py',
+   'PYMODULE'),
+  ('pandas.core.arrays._mixins',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\arrays\\_mixins.py',
+   'PYMODULE'),
+  ('pandas.core.arrays._ranges',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\arrays\\_ranges.py',
+   'PYMODULE'),
+  ('pandas.core.arrays._utils',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\arrays\\_utils.py',
+   'PYMODULE'),
+  ('pandas.core.arrays.arrow',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\arrays\\arrow\\__init__.py',
+   'PYMODULE'),
+  ('pandas.core.arrays.arrow._arrow_utils',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\arrays\\arrow\\_arrow_utils.py',
+   'PYMODULE'),
+  ('pandas.core.arrays.arrow.accessors',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\arrays\\arrow\\accessors.py',
+   'PYMODULE'),
+  ('pandas.core.arrays.arrow.array',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\arrays\\arrow\\array.py',
+   'PYMODULE'),
+  ('pandas.core.arrays.arrow.extension_types',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\arrays\\arrow\\extension_types.py',
+   'PYMODULE'),
+  ('pandas.core.arrays.base',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\arrays\\base.py',
+   'PYMODULE'),
+  ('pandas.core.arrays.boolean',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\arrays\\boolean.py',
+   'PYMODULE'),
+  ('pandas.core.arrays.categorical',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\arrays\\categorical.py',
+   'PYMODULE'),
+  ('pandas.core.arrays.datetimelike',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\arrays\\datetimelike.py',
+   'PYMODULE'),
+  ('pandas.core.arrays.datetimes',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\arrays\\datetimes.py',
+   'PYMODULE'),
+  ('pandas.core.arrays.floating',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\arrays\\floating.py',
+   'PYMODULE'),
+  ('pandas.core.arrays.integer',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\arrays\\integer.py',
+   'PYMODULE'),
+  ('pandas.core.arrays.interval',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\arrays\\interval.py',
+   'PYMODULE'),
+  ('pandas.core.arrays.masked',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\arrays\\masked.py',
+   'PYMODULE'),
+  ('pandas.core.arrays.numeric',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\arrays\\numeric.py',
+   'PYMODULE'),
+  ('pandas.core.arrays.numpy_',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\arrays\\numpy_.py',
+   'PYMODULE'),
+  ('pandas.core.arrays.period',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\arrays\\period.py',
+   'PYMODULE'),
+  ('pandas.core.arrays.sparse',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\arrays\\sparse\\__init__.py',
+   'PYMODULE'),
+  ('pandas.core.arrays.sparse.accessor',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\arrays\\sparse\\accessor.py',
+   'PYMODULE'),
+  ('pandas.core.arrays.sparse.array',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\arrays\\sparse\\array.py',
+   'PYMODULE'),
+  ('pandas.core.arrays.sparse.scipy_sparse',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\arrays\\sparse\\scipy_sparse.py',
+   'PYMODULE'),
+  ('pandas.core.arrays.string_',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\arrays\\string_.py',
+   'PYMODULE'),
+  ('pandas.core.arrays.string_arrow',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\arrays\\string_arrow.py',
+   'PYMODULE'),
+  ('pandas.core.arrays.timedeltas',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\arrays\\timedeltas.py',
+   'PYMODULE'),
+  ('pandas.core.base',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\base.py',
+   'PYMODULE'),
+  ('pandas.core.common',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\common.py',
+   'PYMODULE'),
+  ('pandas.core.computation',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\computation\\__init__.py',
+   'PYMODULE'),
+  ('pandas.core.computation.align',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\computation\\align.py',
+   'PYMODULE'),
+  ('pandas.core.computation.api',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\computation\\api.py',
+   'PYMODULE'),
+  ('pandas.core.computation.check',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\computation\\check.py',
+   'PYMODULE'),
+  ('pandas.core.computation.common',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\computation\\common.py',
+   'PYMODULE'),
+  ('pandas.core.computation.engines',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\computation\\engines.py',
+   'PYMODULE'),
+  ('pandas.core.computation.eval',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\computation\\eval.py',
+   'PYMODULE'),
+  ('pandas.core.computation.expr',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\computation\\expr.py',
+   'PYMODULE'),
+  ('pandas.core.computation.expressions',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\computation\\expressions.py',
+   'PYMODULE'),
+  ('pandas.core.computation.ops',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\computation\\ops.py',
+   'PYMODULE'),
+  ('pandas.core.computation.parsing',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\computation\\parsing.py',
+   'PYMODULE'),
+  ('pandas.core.computation.pytables',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\computation\\pytables.py',
+   'PYMODULE'),
+  ('pandas.core.computation.scope',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\computation\\scope.py',
+   'PYMODULE'),
+  ('pandas.core.config_init',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\config_init.py',
+   'PYMODULE'),
+  ('pandas.core.construction',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\construction.py',
+   'PYMODULE'),
+  ('pandas.core.dtypes',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\dtypes\\__init__.py',
+   'PYMODULE'),
+  ('pandas.core.dtypes.api',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\dtypes\\api.py',
+   'PYMODULE'),
+  ('pandas.core.dtypes.astype',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\dtypes\\astype.py',
+   'PYMODULE'),
+  ('pandas.core.dtypes.base',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\dtypes\\base.py',
+   'PYMODULE'),
+  ('pandas.core.dtypes.cast',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\dtypes\\cast.py',
+   'PYMODULE'),
+  ('pandas.core.dtypes.common',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\dtypes\\common.py',
+   'PYMODULE'),
+  ('pandas.core.dtypes.concat',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\dtypes\\concat.py',
+   'PYMODULE'),
+  ('pandas.core.dtypes.dtypes',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\dtypes\\dtypes.py',
+   'PYMODULE'),
+  ('pandas.core.dtypes.generic',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\dtypes\\generic.py',
+   'PYMODULE'),
+  ('pandas.core.dtypes.inference',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\dtypes\\inference.py',
+   'PYMODULE'),
+  ('pandas.core.dtypes.missing',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\dtypes\\missing.py',
+   'PYMODULE'),
+  ('pandas.core.flags',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\flags.py',
+   'PYMODULE'),
+  ('pandas.core.frame',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\frame.py',
+   'PYMODULE'),
+  ('pandas.core.generic',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\generic.py',
+   'PYMODULE'),
+  ('pandas.core.groupby',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\groupby\\__init__.py',
+   'PYMODULE'),
+  ('pandas.core.groupby.base',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\groupby\\base.py',
+   'PYMODULE'),
+  ('pandas.core.groupby.categorical',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\groupby\\categorical.py',
+   'PYMODULE'),
+  ('pandas.core.groupby.generic',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\groupby\\generic.py',
+   'PYMODULE'),
+  ('pandas.core.groupby.groupby',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\groupby\\groupby.py',
+   'PYMODULE'),
+  ('pandas.core.groupby.grouper',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\groupby\\grouper.py',
+   'PYMODULE'),
+  ('pandas.core.groupby.indexing',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\groupby\\indexing.py',
+   'PYMODULE'),
+  ('pandas.core.groupby.numba_',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\groupby\\numba_.py',
+   'PYMODULE'),
+  ('pandas.core.groupby.ops',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\groupby\\ops.py',
+   'PYMODULE'),
+  ('pandas.core.indexers',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\indexers\\__init__.py',
+   'PYMODULE'),
+  ('pandas.core.indexers.objects',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\indexers\\objects.py',
+   'PYMODULE'),
+  ('pandas.core.indexers.utils',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\indexers\\utils.py',
+   'PYMODULE'),
+  ('pandas.core.indexes',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\indexes\\__init__.py',
+   'PYMODULE'),
+  ('pandas.core.indexes.accessors',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\indexes\\accessors.py',
+   'PYMODULE'),
+  ('pandas.core.indexes.api',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\indexes\\api.py',
+   'PYMODULE'),
+  ('pandas.core.indexes.base',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\indexes\\base.py',
+   'PYMODULE'),
+  ('pandas.core.indexes.category',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\indexes\\category.py',
+   'PYMODULE'),
+  ('pandas.core.indexes.datetimelike',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\indexes\\datetimelike.py',
+   'PYMODULE'),
+  ('pandas.core.indexes.datetimes',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\indexes\\datetimes.py',
+   'PYMODULE'),
+  ('pandas.core.indexes.extension',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\indexes\\extension.py',
+   'PYMODULE'),
+  ('pandas.core.indexes.frozen',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\indexes\\frozen.py',
+   'PYMODULE'),
+  ('pandas.core.indexes.interval',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\indexes\\interval.py',
+   'PYMODULE'),
+  ('pandas.core.indexes.multi',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\indexes\\multi.py',
+   'PYMODULE'),
+  ('pandas.core.indexes.period',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\indexes\\period.py',
+   'PYMODULE'),
+  ('pandas.core.indexes.range',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\indexes\\range.py',
+   'PYMODULE'),
+  ('pandas.core.indexes.timedeltas',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\indexes\\timedeltas.py',
+   'PYMODULE'),
+  ('pandas.core.indexing',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\indexing.py',
+   'PYMODULE'),
+  ('pandas.core.interchange',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\interchange\\__init__.py',
+   'PYMODULE'),
+  ('pandas.core.interchange.buffer',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\interchange\\buffer.py',
+   'PYMODULE'),
+  ('pandas.core.interchange.column',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\interchange\\column.py',
+   'PYMODULE'),
+  ('pandas.core.interchange.dataframe',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\interchange\\dataframe.py',
+   'PYMODULE'),
+  ('pandas.core.interchange.dataframe_protocol',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\interchange\\dataframe_protocol.py',
+   'PYMODULE'),
+  ('pandas.core.interchange.from_dataframe',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\interchange\\from_dataframe.py',
+   'PYMODULE'),
+  ('pandas.core.interchange.utils',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\interchange\\utils.py',
+   'PYMODULE'),
+  ('pandas.core.internals',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\internals\\__init__.py',
+   'PYMODULE'),
+  ('pandas.core.internals.api',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\internals\\api.py',
+   'PYMODULE'),
+  ('pandas.core.internals.array_manager',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\internals\\array_manager.py',
+   'PYMODULE'),
+  ('pandas.core.internals.base',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\internals\\base.py',
+   'PYMODULE'),
+  ('pandas.core.internals.blocks',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\internals\\blocks.py',
+   'PYMODULE'),
+  ('pandas.core.internals.concat',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\internals\\concat.py',
+   'PYMODULE'),
+  ('pandas.core.internals.construction',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\internals\\construction.py',
+   'PYMODULE'),
+  ('pandas.core.internals.managers',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\internals\\managers.py',
+   'PYMODULE'),
+  ('pandas.core.internals.ops',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\internals\\ops.py',
+   'PYMODULE'),
+  ('pandas.core.methods',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\methods\\__init__.py',
+   'PYMODULE'),
+  ('pandas.core.methods.describe',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\methods\\describe.py',
+   'PYMODULE'),
+  ('pandas.core.methods.selectn',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\methods\\selectn.py',
+   'PYMODULE'),
+  ('pandas.core.methods.to_dict',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\methods\\to_dict.py',
+   'PYMODULE'),
+  ('pandas.core.missing',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\missing.py',
+   'PYMODULE'),
+  ('pandas.core.nanops',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\nanops.py',
+   'PYMODULE'),
+  ('pandas.core.ops',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\ops\\__init__.py',
+   'PYMODULE'),
+  ('pandas.core.ops.array_ops',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\ops\\array_ops.py',
+   'PYMODULE'),
+  ('pandas.core.ops.common',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\ops\\common.py',
+   'PYMODULE'),
+  ('pandas.core.ops.dispatch',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\ops\\dispatch.py',
+   'PYMODULE'),
+  ('pandas.core.ops.docstrings',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\ops\\docstrings.py',
+   'PYMODULE'),
+  ('pandas.core.ops.invalid',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\ops\\invalid.py',
+   'PYMODULE'),
+  ('pandas.core.ops.mask_ops',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\ops\\mask_ops.py',
+   'PYMODULE'),
+  ('pandas.core.ops.missing',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\ops\\missing.py',
+   'PYMODULE'),
+  ('pandas.core.resample',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\resample.py',
+   'PYMODULE'),
+  ('pandas.core.reshape',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\reshape\\__init__.py',
+   'PYMODULE'),
+  ('pandas.core.reshape.api',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\reshape\\api.py',
+   'PYMODULE'),
+  ('pandas.core.reshape.concat',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\reshape\\concat.py',
+   'PYMODULE'),
+  ('pandas.core.reshape.encoding',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\reshape\\encoding.py',
+   'PYMODULE'),
+  ('pandas.core.reshape.melt',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\reshape\\melt.py',
+   'PYMODULE'),
+  ('pandas.core.reshape.merge',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\reshape\\merge.py',
+   'PYMODULE'),
+  ('pandas.core.reshape.pivot',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\reshape\\pivot.py',
+   'PYMODULE'),
+  ('pandas.core.reshape.reshape',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\reshape\\reshape.py',
+   'PYMODULE'),
+  ('pandas.core.reshape.tile',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\reshape\\tile.py',
+   'PYMODULE'),
+  ('pandas.core.reshape.util',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\reshape\\util.py',
+   'PYMODULE'),
+  ('pandas.core.roperator',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\roperator.py',
+   'PYMODULE'),
+  ('pandas.core.sample',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\sample.py',
+   'PYMODULE'),
+  ('pandas.core.series',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\series.py',
+   'PYMODULE'),
+  ('pandas.core.shared_docs',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\shared_docs.py',
+   'PYMODULE'),
+  ('pandas.core.sorting',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\sorting.py',
+   'PYMODULE'),
+  ('pandas.core.strings',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\strings\\__init__.py',
+   'PYMODULE'),
+  ('pandas.core.strings.accessor',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\strings\\accessor.py',
+   'PYMODULE'),
+  ('pandas.core.strings.base',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\strings\\base.py',
+   'PYMODULE'),
+  ('pandas.core.strings.object_array',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\strings\\object_array.py',
+   'PYMODULE'),
+  ('pandas.core.tools',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\tools\\__init__.py',
+   'PYMODULE'),
+  ('pandas.core.tools.datetimes',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\tools\\datetimes.py',
+   'PYMODULE'),
+  ('pandas.core.tools.numeric',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\tools\\numeric.py',
+   'PYMODULE'),
+  ('pandas.core.tools.timedeltas',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\tools\\timedeltas.py',
+   'PYMODULE'),
+  ('pandas.core.tools.times',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\tools\\times.py',
+   'PYMODULE'),
+  ('pandas.core.util',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\util\\__init__.py',
+   'PYMODULE'),
+  ('pandas.core.util.hashing',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\util\\hashing.py',
+   'PYMODULE'),
+  ('pandas.core.util.numba_',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\util\\numba_.py',
+   'PYMODULE'),
+  ('pandas.core.window',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\window\\__init__.py',
+   'PYMODULE'),
+  ('pandas.core.window.common',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\window\\common.py',
+   'PYMODULE'),
+  ('pandas.core.window.doc',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\window\\doc.py',
+   'PYMODULE'),
+  ('pandas.core.window.ewm',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\window\\ewm.py',
+   'PYMODULE'),
+  ('pandas.core.window.expanding',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\window\\expanding.py',
+   'PYMODULE'),
+  ('pandas.core.window.numba_',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\window\\numba_.py',
+   'PYMODULE'),
+  ('pandas.core.window.online',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\window\\online.py',
+   'PYMODULE'),
+  ('pandas.core.window.rolling',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\core\\window\\rolling.py',
+   'PYMODULE'),
+  ('pandas.errors',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\errors\\__init__.py',
+   'PYMODULE'),
+  ('pandas.io',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\__init__.py',
+   'PYMODULE'),
+  ('pandas.io._util',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\_util.py',
+   'PYMODULE'),
+  ('pandas.io.api',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\api.py',
+   'PYMODULE'),
+  ('pandas.io.clipboard',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\clipboard\\__init__.py',
+   'PYMODULE'),
+  ('pandas.io.clipboards',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\clipboards.py',
+   'PYMODULE'),
+  ('pandas.io.common',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\common.py',
+   'PYMODULE'),
+  ('pandas.io.excel',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\excel\\__init__.py',
+   'PYMODULE'),
+  ('pandas.io.excel._base',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\excel\\_base.py',
+   'PYMODULE'),
+  ('pandas.io.excel._calamine',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\excel\\_calamine.py',
+   'PYMODULE'),
+  ('pandas.io.excel._odfreader',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\excel\\_odfreader.py',
+   'PYMODULE'),
+  ('pandas.io.excel._odswriter',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\excel\\_odswriter.py',
+   'PYMODULE'),
+  ('pandas.io.excel._openpyxl',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\excel\\_openpyxl.py',
+   'PYMODULE'),
+  ('pandas.io.excel._pyxlsb',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\excel\\_pyxlsb.py',
+   'PYMODULE'),
+  ('pandas.io.excel._util',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\excel\\_util.py',
+   'PYMODULE'),
+  ('pandas.io.excel._xlrd',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\excel\\_xlrd.py',
+   'PYMODULE'),
+  ('pandas.io.excel._xlsxwriter',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\excel\\_xlsxwriter.py',
+   'PYMODULE'),
+  ('pandas.io.feather_format',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\feather_format.py',
+   'PYMODULE'),
+  ('pandas.io.formats',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\formats\\__init__.py',
+   'PYMODULE'),
+  ('pandas.io.formats._color_data',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\formats\\_color_data.py',
+   'PYMODULE'),
+  ('pandas.io.formats.console',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\formats\\console.py',
+   'PYMODULE'),
+  ('pandas.io.formats.css',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\formats\\css.py',
+   'PYMODULE'),
+  ('pandas.io.formats.csvs',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\formats\\csvs.py',
+   'PYMODULE'),
+  ('pandas.io.formats.excel',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\formats\\excel.py',
+   'PYMODULE'),
+  ('pandas.io.formats.format',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\formats\\format.py',
+   'PYMODULE'),
+  ('pandas.io.formats.html',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\formats\\html.py',
+   'PYMODULE'),
+  ('pandas.io.formats.info',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\formats\\info.py',
+   'PYMODULE'),
+  ('pandas.io.formats.printing',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\formats\\printing.py',
+   'PYMODULE'),
+  ('pandas.io.formats.string',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\formats\\string.py',
+   'PYMODULE'),
+  ('pandas.io.formats.style',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\formats\\style.py',
+   'PYMODULE'),
+  ('pandas.io.formats.style_render',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\formats\\style_render.py',
+   'PYMODULE'),
+  ('pandas.io.formats.xml',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\formats\\xml.py',
+   'PYMODULE'),
+  ('pandas.io.gbq',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\gbq.py',
+   'PYMODULE'),
+  ('pandas.io.html',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\html.py',
+   'PYMODULE'),
+  ('pandas.io.json',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\json\\__init__.py',
+   'PYMODULE'),
+  ('pandas.io.json._json',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\json\\_json.py',
+   'PYMODULE'),
+  ('pandas.io.json._normalize',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\json\\_normalize.py',
+   'PYMODULE'),
+  ('pandas.io.json._table_schema',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\json\\_table_schema.py',
+   'PYMODULE'),
+  ('pandas.io.orc',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\orc.py',
+   'PYMODULE'),
+  ('pandas.io.parquet',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\parquet.py',
+   'PYMODULE'),
+  ('pandas.io.parsers',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\parsers\\__init__.py',
+   'PYMODULE'),
+  ('pandas.io.parsers.arrow_parser_wrapper',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\parsers\\arrow_parser_wrapper.py',
+   'PYMODULE'),
+  ('pandas.io.parsers.base_parser',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\parsers\\base_parser.py',
+   'PYMODULE'),
+  ('pandas.io.parsers.c_parser_wrapper',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\parsers\\c_parser_wrapper.py',
+   'PYMODULE'),
+  ('pandas.io.parsers.python_parser',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\parsers\\python_parser.py',
+   'PYMODULE'),
+  ('pandas.io.parsers.readers',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\parsers\\readers.py',
+   'PYMODULE'),
+  ('pandas.io.pickle',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\pickle.py',
+   'PYMODULE'),
+  ('pandas.io.pytables',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\pytables.py',
+   'PYMODULE'),
+  ('pandas.io.sas',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\sas\\__init__.py',
+   'PYMODULE'),
+  ('pandas.io.sas.sas7bdat',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\sas\\sas7bdat.py',
+   'PYMODULE'),
+  ('pandas.io.sas.sas_constants',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\sas\\sas_constants.py',
+   'PYMODULE'),
+  ('pandas.io.sas.sas_xport',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\sas\\sas_xport.py',
+   'PYMODULE'),
+  ('pandas.io.sas.sasreader',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\sas\\sasreader.py',
+   'PYMODULE'),
+  ('pandas.io.spss',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\spss.py',
+   'PYMODULE'),
+  ('pandas.io.sql',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\sql.py',
+   'PYMODULE'),
+  ('pandas.io.stata',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\stata.py',
+   'PYMODULE'),
+  ('pandas.io.xml',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\io\\xml.py',
+   'PYMODULE'),
+  ('pandas.plotting',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\plotting\\__init__.py',
+   'PYMODULE'),
+  ('pandas.plotting._core',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\plotting\\_core.py',
+   'PYMODULE'),
+  ('pandas.plotting._misc',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\plotting\\_misc.py',
+   'PYMODULE'),
+  ('pandas.testing',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\testing.py',
+   'PYMODULE'),
+  ('pandas.tseries',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\tseries\\__init__.py',
+   'PYMODULE'),
+  ('pandas.tseries.api',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\tseries\\api.py',
+   'PYMODULE'),
+  ('pandas.tseries.frequencies',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\tseries\\frequencies.py',
+   'PYMODULE'),
+  ('pandas.tseries.holiday',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\tseries\\holiday.py',
+   'PYMODULE'),
+  ('pandas.tseries.offsets',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\tseries\\offsets.py',
+   'PYMODULE'),
+  ('pandas.util',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\util\\__init__.py',
+   'PYMODULE'),
+  ('pandas.util._decorators',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\util\\_decorators.py',
+   'PYMODULE'),
+  ('pandas.util._exceptions',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\util\\_exceptions.py',
+   'PYMODULE'),
+  ('pandas.util._print_versions',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\util\\_print_versions.py',
+   'PYMODULE'),
+  ('pandas.util._tester',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\util\\_tester.py',
+   'PYMODULE'),
+  ('pandas.util._validators',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\util\\_validators.py',
+   'PYMODULE'),
+  ('pandas.util.version',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pandas\\util\\version\\__init__.py',
+   'PYMODULE'),
   ('pathlib',
    'C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\pathlib.py',
    'PYMODULE'),
@@ -2165,6 +3379,9 @@
    'PYMODULE'),
   ('pickle',
    'C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\pickle.py',
+   'PYMODULE'),
+  ('pickletools',
+   'C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\pickletools.py',
    'PYMODULE'),
   ('pkgutil',
    'C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\pkgutil.py',
@@ -2187,6 +3404,26 @@
   ('pydoc_data.topics',
    'C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\pydoc_data\\topics.py',
    'PYMODULE'),
+  ('pytz',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pytz\\__init__.py',
+   'PYMODULE'),
+  ('pytz.exceptions',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pytz\\exceptions.py',
+   'PYMODULE'),
+  ('pytz.lazy',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pytz\\lazy.py',
+   'PYMODULE'),
+  ('pytz.tzfile',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pytz\\tzfile.py',
+   'PYMODULE'),
+  ('pytz.tzinfo',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\pytz\\tzinfo.py',
+   'PYMODULE'),
   ('queue',
    'C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\queue.py',
    'PYMODULE'),
@@ -2195,6 +3432,52 @@
    'PYMODULE'),
   ('random',
    'C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\random.py',
+   'PYMODULE'),
+  ('reconciliation',
+   'E:\\BANK RECON\\BankReconsilation\\src\\reconciliation\\__init__.py',
+   'PYMODULE'),
+  ('reconciliation.exporters',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\src\\reconciliation\\exporters\\__init__.py',
+   'PYMODULE'),
+  ('reconciliation.exporters.export_manager',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\src\\reconciliation\\exporters\\export_manager.py',
+   'PYMODULE'),
+  ('reconciliation.modular_engine',
+   'E:\\BANK RECON\\BankReconsilation\\src\\reconciliation\\modular_engine.py',
+   'PYMODULE'),
+  ('reconciliation.processors',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\src\\reconciliation\\processors\\__init__.py',
+   'PYMODULE'),
+  ('reconciliation.processors.bank_ledger_processor',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\src\\reconciliation\\processors\\bank_ledger_processor.py',
+   'PYMODULE'),
+  ('reconciliation.processors.demand_report_processor',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\src\\reconciliation\\processors\\demand_report_processor.py',
+   'PYMODULE'),
+  ('reconciliation.processors.group_payment_processor',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\src\\reconciliation\\processors\\group_payment_processor.py',
+   'PYMODULE'),
+  ('reconciliation.processors.merge_operations',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\src\\reconciliation\\processors\\merge_operations.py',
+   'PYMODULE'),
+  ('reconciliation.processors.phase3_processor',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\src\\reconciliation\\processors\\phase3_processor.py',
+   'PYMODULE'),
+  ('reconciliation.processors.process_utils',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\src\\reconciliation\\processors\\process_utils.py',
+   'PYMODULE'),
+  ('reconciliation.processors.sib_qr_processor',
+   'E:\\BANK '
+   'RECON\\BankReconsilation\\src\\reconciliation\\processors\\sib_qr_processor.py',
    'PYMODULE'),
   ('rlcompleter',
    'C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\rlcompleter.py',
@@ -2832,11 +4115,26 @@
   ('site',
    'C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site.py',
    'PYMODULE'),
+  ('six',
+   'E:\\BANK RECON\\BankReconsilation\\.venv\\Lib\\site-packages\\six.py',
+   'PYMODULE'),
   ('socket',
    'C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\socket.py',
    'PYMODULE'),
   ('socketserver',
    'C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\socketserver.py',
+   'PYMODULE'),
+  ('sqlite3',
+   'C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\sqlite3\\__init__.py',
+   'PYMODULE'),
+  ('sqlite3.__main__',
+   'C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\sqlite3\\__main__.py',
+   'PYMODULE'),
+  ('sqlite3.dbapi2',
+   'C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\sqlite3\\dbapi2.py',
+   'PYMODULE'),
+  ('sqlite3.dump',
+   'C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\sqlite3\\dump.py',
    'PYMODULE'),
   ('ssl',
    'C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\ssl.py',
@@ -2871,8 +4169,26 @@
   ('tkinter',
    'C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\tkinter\\__init__.py',
    'PYMODULE'),
+  ('tkinter.commondialog',
+   'C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\tkinter\\commondialog.py',
+   'PYMODULE'),
   ('tkinter.constants',
    'C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\tkinter\\constants.py',
+   'PYMODULE'),
+  ('tkinter.dialog',
+   'C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\tkinter\\dialog.py',
+   'PYMODULE'),
+  ('tkinter.filedialog',
+   'C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\tkinter\\filedialog.py',
+   'PYMODULE'),
+  ('tkinter.messagebox',
+   'C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\tkinter\\messagebox.py',
+   'PYMODULE'),
+  ('tkinter.simpledialog',
+   'C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\tkinter\\simpledialog.py',
+   'PYMODULE'),
+  ('tkinter.ttk',
+   'C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\tkinter\\ttk.py',
    'PYMODULE'),
   ('tkinterdnd2',
    'E:\\BANK '
@@ -2908,6 +4224,15 @@
    'PYMODULE'),
   ('typing',
    'C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\typing.py',
+   'PYMODULE'),
+  ('ui_modular',
+   'E:\\BANK RECON\\BankReconsilation\\src\\ui_modular.py',
+   'PYMODULE'),
+  ('ui_styles',
+   'E:\\BANK RECON\\BankReconsilation\\src\\ui_styles\\__init__.py',
+   'PYMODULE'),
+  ('ui_styles.theme',
+   'E:\\BANK RECON\\BankReconsilation\\src\\ui_styles\\theme.py',
    'PYMODULE'),
   ('unittest',
    'C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\unittest\\__init__.py',
@@ -2959,6 +4284,15 @@
    'PYMODULE'),
   ('urllib.response',
    'C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\urllib\\response.py',
+   'PYMODULE'),
+  ('utils',
+   'E:\\BANK RECON\\BankReconsilation\\src\\utils\\__init__.py',
+   'PYMODULE'),
+  ('utils.excel_exporter',
+   'E:\\BANK RECON\\BankReconsilation\\src\\utils\\excel_exporter.py',
+   'PYMODULE'),
+  ('uuid',
+   'C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\uuid.py',
    'PYMODULE'),
   ('webbrowser',
    'C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\webbrowser.py',
@@ -3133,6 +4467,30 @@
    'PYMODULE'),
   ('xml',
    'C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\xml\\__init__.py',
+   'PYMODULE'),
+  ('xml.dom',
+   'C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\xml\\dom\\__init__.py',
+   'PYMODULE'),
+  ('xml.dom.NodeFilter',
+   'C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\xml\\dom\\NodeFilter.py',
+   'PYMODULE'),
+  ('xml.dom.domreg',
+   'C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\xml\\dom\\domreg.py',
+   'PYMODULE'),
+  ('xml.dom.expatbuilder',
+   'C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\xml\\dom\\expatbuilder.py',
+   'PYMODULE'),
+  ('xml.dom.minicompat',
+   'C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\xml\\dom\\minicompat.py',
+   'PYMODULE'),
+  ('xml.dom.minidom',
+   'C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\xml\\dom\\minidom.py',
+   'PYMODULE'),
+  ('xml.dom.pulldom',
+   'C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\xml\\dom\\pulldom.py',
+   'PYMODULE'),
+  ('xml.dom.xmlbuilder',
+   'C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\xml\\dom\\xmlbuilder.py',
    'PYMODULE'),
   ('xml.etree',
    'C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\xml\\etree\\__init__.py',

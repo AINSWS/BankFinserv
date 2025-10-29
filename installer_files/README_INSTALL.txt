@@ -1,7 +1,7 @@
-Welcome to Unatti Bank Reconciliation Tool Setup!
+Welcome to Unnatti Bank Reconciliation Tool Setup!
 
 DEVELOPED BY: Neuro Spark Work Solutions
-CLIENT: Unatti Finserv
+CLIENT: Unnatti Finserv
 VERSION: 1.0.0
 
 FEATURES:
@@ -21,10 +21,10 @@ SYSTEM REQUIREMENTS:
 
 INSTALLATION:
 This installer will:
-1. Install the application to Program Files\Unatti\
+1. Install the application to Program Files\Unnatti\
 2. Create desktop shortcut (optional)
-3. Add to Start Menu under "Unatti Bank Reconciliation Tool"
-4. Create dedicated data folders for Unatti Finserv
+3. Add to Start Menu under "Unnatti Bank Reconciliation Tool"
+4. Create dedicated data folders for Unnatti Finserv
 5. Set up export directories
 
 POST-INSTALLATION:
@@ -36,6 +36,6 @@ POST-INSTALLATION:
 SUPPORT:
 Developer: Neuro Spark Work Solutions
 Technical Support: contact@neurosparkworks.com
-Client: Unatti Finserv
+Client: Unnatti Finserv
 
-This tool is specifically customized for Unatti Finserv's reconciliation workflow.
+This tool is specifically customized for Unnatti Finserv's reconciliation workflow.

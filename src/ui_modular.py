@@ -51,7 +51,7 @@ class BankReconciliationUI:
     
     def _setup_window(self):
         """Configure main window"""
-        self.root.title("🏦 Unatti Finserv Reconciliation Tool")
+        self.root.title("🏦 Unnatti Finserv Reconciliation Tool")
         self.root.geometry("1280x720")  # 720p compatible size
         self.root.minsize(1024, 600)    # Support lower resolutions
         self.root.configure(bg=UITheme.BACKGROUND_DARK)
@@ -134,7 +134,7 @@ class BankReconciliationUI:
         
         title_label = tk.Label(
             header_frame,
-            text="🏦 Unatti Finserv Reconciliation Tool",
+            text="🏦 Unnatti Finserv Reconciliation Tool",
             font=UITheme.get_font_config("title"),
             fg=UITheme.ACCENT_BLUE,
             bg=UITheme.BACKGROUND_DARK
@@ -347,7 +347,7 @@ class BankReconciliationUI:
         
         header_label = tk.Label(
             results_header,
-            text="🏦 Unatti Finserv Reconciliation Results",
+            text="🏦 Unnatti Finserv Reconciliation Results",
             font=UITheme.get_font_config("header"),
             fg=UITheme.ACCENT_BLUE,
             bg=UITheme.BACKGROUND_MEDIUM
