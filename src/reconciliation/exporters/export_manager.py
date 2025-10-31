@@ -309,6 +309,14 @@ class ExportManager:
             # Add Remarks column to DataFrame
             original_bank_df['Remarks'] = remarks_col
             
+            # Sort by Loan ID in ascending order (if loan_id_col was found)
+            if loan_id_col and loan_id_col in original_bank_df.columns:
+                print(f"   📊 Sorting bank ledger by '{loan_id_col}' in ascending order...")
+                # Convert to numeric for proper sorting (handles both numeric and string IDs)
+                original_bank_df[loan_id_col] = pd.to_numeric(original_bank_df[loan_id_col], errors='coerce')
+                original_bank_df = original_bank_df.sort_values(by=loan_id_col, ascending=True, na_position='last')
+                original_bank_df = original_bank_df.reset_index(drop=True)
+            
             # Prepare filename
             if output_filename is None:
                 timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
