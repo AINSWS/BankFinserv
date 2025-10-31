@@ -11,6 +11,40 @@ class FileHandler:
     SUPPORTED_EXTENSIONS = ('.xlsx', '.xls', '.csv')
     
     @staticmethod
+    def find_table_start_row(file_path):
+        """
+        Find the row where the actual data table starts by looking for 'S.no' or similar column.
+        This skips company headers, logos, etc. that appear above the table.
+        
+        Returns:
+            int: Row number (0-indexed) where table starts, or 0 if not found
+        """
+        try:
+            # Read first 20 rows to search for the header
+            if file_path.lower().endswith('.csv'):
+                df_preview = pd.read_csv(file_path, nrows=20, header=None, encoding='utf-8', low_memory=False)
+            else:
+                df_preview = pd.read_excel(file_path, nrows=20, header=None)
+            
+            # Search for 'S.no' or variations in each row
+            for idx, row in df_preview.iterrows():
+                # Convert row to string and check for S.no patterns
+                row_str = ' '.join([str(cell).strip().lower() for cell in row if pd.notna(cell)])
+                
+                # Check for common variations of S.no
+                if any(pattern in row_str for pattern in ['s.no', 's no', 'sno', 'sr.no', 'sr no', 'serial']):
+                    print(f"   ✓ Found table header at row {idx + 1}, skipping {idx} header rows")
+                    return idx
+            
+            # If not found, assume table starts at row 0
+            print("   ℹ️ No 'S.no' column found, assuming table starts at row 1")
+            return 0
+            
+        except Exception as e:
+            print(f"   ⚠️ Error detecting table start: {str(e)}, assuming row 1")
+            return 0
+    
+    @staticmethod
     def validate_file(file_path):
         """Validate file exists and has supported extension"""
         if not os.path.exists(file_path) or not os.path.isfile(file_path):
@@ -28,18 +62,21 @@ class FileHandler:
         try:
             df = None
             
+            # Detect where the actual table starts (skip company headers, etc.)
+            skip_rows = FileHandler.find_table_start_row(file_path)
+            
             if file_path.lower().endswith('.csv'):
                 # Enhanced CSV loading with multiple encoding attempts
                 try:
-                    df = pd.read_csv(file_path, encoding='utf-8', low_memory=False)
+                    df = pd.read_csv(file_path, skiprows=skip_rows, encoding='utf-8', low_memory=False)
                 except UnicodeDecodeError:
                     try:
-                        df = pd.read_csv(file_path, encoding='latin-1', low_memory=False)
+                        df = pd.read_csv(file_path, skiprows=skip_rows, encoding='latin-1', low_memory=False)
                     except UnicodeDecodeError:
-                        df = pd.read_csv(file_path, encoding='cp1252', low_memory=False)
+                        df = pd.read_csv(file_path, skiprows=skip_rows, encoding='cp1252', low_memory=False)
             elif file_path.lower().endswith(('.xlsx', '.xls')):
-                # Excel file handling
-                df = pd.read_excel(file_path)
+                # Excel file handling with header detection
+                df = pd.read_excel(file_path, skiprows=skip_rows)
             
             if df is not None and not df.empty:
                 return df, None
