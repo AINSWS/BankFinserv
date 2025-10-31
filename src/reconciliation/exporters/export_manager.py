@@ -197,24 +197,59 @@ class ExportManager:
             if matches_df is None or matches_df.empty:
                 raise Exception("No reconciliation data available")
             
-            # Create mapping from loan_id to reconciliation status and difference
-            recon_map = {}
+            # DEBUG: Check if Phase 3 updates are present
+            if 'reconciliation_status' in matches_df.columns:
+                phase3_count = len(matches_df[matches_df['reconciliation_status'].str.contains('Phase 3', na=False)])
+                stage2_count = len(matches_df[matches_df['reconciliation_status'].str.contains('Group Payment', na=False)])
+                print(f"   🔍 DEBUG - Reconciliation data check:")
+                print(f"      • Total records: {len(matches_df)}")
+                print(f"      • Phase 3 matches: {phase3_count}")
+                print(f"      • Stage 2 matches: {stage2_count}")
+                # Show actual status values for debugging
+                unique_statuses = matches_df['reconciliation_status'].unique()
+                print(f"      • Unique statuses found: {list(unique_statuses)[:10]}")  # Show first 10
+            
+            # CRITICAL FIX: Use direct "Loan Id" column from bank ledger instead of index matching
+            # Find the loan_id column in original bank ledger
+            loan_id_col = None
+            for col in original_bank_df.columns:
+                if 'loan' in col.lower() and 'id' in col.lower():
+                    loan_id_col = col
+                    print(f"   ✓ Found direct Loan ID column: '{loan_id_col}'")
+                    break
+            
+            # Create sets of matched and mismatched loan IDs from reconciliation data
+            matched_loan_ids = set()
+            mismatched_loan_ids = set()
+            recon_map = {}  # loan_id → {status, difference}
+            
             for _, row in matches_df.iterrows():
-                loan_id = row.get('loan_id')
+                # Convert to string and remove .0 if it's a float
+                loan_id_raw = row.get('loan_id', '')
+                if pd.notna(loan_id_raw):
+                    loan_id = str(loan_id_raw).strip()
+                    # Remove .0 suffix if present (e.g., '223345.0' → '223345')
+                    if loan_id.endswith('.0'):
+                        loan_id = loan_id[:-2]
+                else:
+                    loan_id = ''
+                    
                 if loan_id:
                     status = row.get('reconciliation_status', row.get('status', 'Unknown'))
                     difference = row.get('amount_difference', 0)
                     
-                    # Create remarks based on status
+                    # Categorize loan IDs
                     if 'MATCHED' in str(status):
+                        matched_loan_ids.add(loan_id)
                         if 'Group Payment' in str(status):
-                            remarks = f"✓ MATCHED - {status}"
-                        elif 'Credit/Debit' in str(status) or 'Phase 3' in str(status):
-                            remarks = f"✓ MATCHED - {status}"
+                            remarks = f"✓ {status}"
+                        elif 'Phase 3' in str(status) or 'Credit/Debit' in str(status):
+                            remarks = f"✓ {status}"
                         else:
                             remarks = "✓ MATCHED"
                     elif 'MISMATCH' in str(status):
-                        remarks = f"✗ MISMATCH"
+                        mismatched_loan_ids.add(loan_id)
+                        remarks = f"✗ MISMATCH (Diff: {difference:.2f})"
                     else:
                         remarks = str(status)
                     
@@ -223,28 +258,55 @@ class ExportManager:
                         'difference': difference
                     }
             
-            # Add Difference and Remarks columns to original bank ledger
-            difference_col = []
+            print(f"   • Matched loan IDs: {len(matched_loan_ids)}")
+            print(f"   • Mismatched loan IDs: {len(mismatched_loan_ids)}")
+            
+            # Add Remarks column to original bank ledger using direct loan_id column
             remarks_col = []
+            remarks_added = 0
             
-            for idx, row in original_bank_df.iterrows():
-                # Try to get loan_id from parsed data at same index
-                if idx < len(parsed_df):
-                    parsed_row = parsed_df.iloc[idx]
-                    loan_id = parsed_row.get('loan_id') if parsed_row.get('loan_id_valid', False) else None
-                    
-                    if loan_id and loan_id in recon_map:
-                        difference_col.append(recon_map[loan_id]['difference'])
-                        remarks_col.append(recon_map[loan_id]['remarks'])
+            if loan_id_col:
+                # DEBUG: Check first few loan IDs from bank ledger
+                sample_bank_ids = original_bank_df[loan_id_col].head(3).tolist()
+                sample_recon_ids = list(recon_map.keys())[:3]
+                print(f"   🔍 DEBUG - Loan ID matching:")
+                print(f"      • Sample bank ledger IDs: {sample_bank_ids}")
+                print(f"      • Sample reconciliation IDs: {sample_recon_ids}")
+                
+                # Use direct loan_id column from bank ledger
+                for idx, row in original_bank_df.iterrows():
+                    loan_id_raw = row.get(loan_id_col, '')
+                    if pd.notna(loan_id_raw):
+                        loan_id_value = str(loan_id_raw).strip()
+                        # Remove .0 suffix if present
+                        if loan_id_value.endswith('.0'):
+                            loan_id_value = loan_id_value[:-2]
                     else:
-                        difference_col.append("")
+                        loan_id_value = ''
+                    
+                    if loan_id_value and loan_id_value in recon_map:
+                        remarks_col.append(recon_map[loan_id_value]['remarks'])
+                        remarks_added += 1
+                    else:
                         remarks_col.append("")  # Empty for non-reconciled entries
-                else:
-                    difference_col.append("")
-                    remarks_col.append("")
+                
+                print(f"   • Remarks added to {remarks_added}/{len(original_bank_df)} rows")
+            else:
+                # Fallback: Try to use parsed data (old method)
+                print(f"   ⚠️ No direct Loan ID column found, using parsed data fallback")
+                for idx, row in original_bank_df.iterrows():
+                    if idx < len(parsed_df):
+                        parsed_row = parsed_df.iloc[idx]
+                        loan_id = parsed_row.get('loan_id') if parsed_row.get('loan_id_valid', False) else None
+                        
+                        if loan_id and loan_id in recon_map:
+                            remarks_col.append(recon_map[loan_id]['remarks'])
+                        else:
+                            remarks_col.append("")
+                    else:
+                        remarks_col.append("")
             
-            # Add new columns to DataFrame
-            original_bank_df['Difference'] = difference_col
+            # Add Remarks column to DataFrame
             original_bank_df['Remarks'] = remarks_col
             
             # Prepare filename

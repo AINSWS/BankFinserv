@@ -1459,8 +1459,15 @@ class BankReconciliationUI:
             return
         
         try:
-            # Use cached reconciliation data (already includes Stage 2 processing)
-            reconciliation_data = self.current_results
+            # CRITICAL: Use engine's cached result to get Phase 3 updates
+            if self.current_recon_engine and \
+               hasattr(self.current_recon_engine, '_cached_reconciliation_result') and \
+               self.current_recon_engine._cached_reconciliation_result is not None:
+                print("   ✓ Using engine's cached result (includes Phase 3 & Stage 2 updates)")
+                reconciliation_data = self.current_recon_engine._cached_reconciliation_result
+            else:
+                print("   ⚠️ Using UI cached result (may be missing Phase 3 updates)")
+                reconciliation_data = self.current_results
             
             if reconciliation_data and reconciliation_data.get('status') == 'success':
                 # Use the existing working export method

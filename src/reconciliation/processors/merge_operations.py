@@ -461,12 +461,35 @@ class MergeOperationsHandler:
                 
                 full_df = reconciliation_result['merged_pivot_data'].copy()
                 
+                # DEBUG: Show what statuses exist in the data
+                print(f"\n🔍 DEBUG - Reconciliation Status Distribution:")
+                if 'reconciliation_status' in full_df.columns:
+                    status_counts = full_df['reconciliation_status'].value_counts()
+                    for status, count in status_counts.items():
+                        print(f"   • {status}: {count}")
+                
                 # Extract different types of mismatched entries
+                # Use string matching to capture all matched records (including Phase 3 and Stage 2)
                 perfect_matches = full_df[full_df['reconciliation_status'] == 'MATCHED - Perfect Match'].copy()
                 minor_matches = full_df[full_df['reconciliation_status'] == 'MATCHED - Minor Difference'].copy()
+                
+                # Capture all other matched records (Phase 3, Stage 2, etc.)
+                other_matched = full_df[
+                    (full_df['reconciliation_status'].str.contains('MATCHED', na=False)) & 
+                    (~full_df['reconciliation_status'].isin(['MATCHED - Perfect Match', 'MATCHED - Minor Difference']))
+                ].copy()
+                
+                # Extract mismatches - only records that contain 'MISMATCH' or 'ONLY'
                 amount_mismatches = full_df[full_df['reconciliation_status'] == 'MISMATCH - Amount Difference'].copy()
                 bank_only = full_df[full_df['reconciliation_status'] == 'BANK_ONLY - No QR Collection'].copy()
                 qr_only = full_df[full_df['reconciliation_status'] == 'QR_ONLY - No Bank Entry'].copy()
+                
+                # DEBUG: Verify the counts
+                print(f"\n🔍 DEBUG - Extracted Breakdown Counts:")
+                print(f"   • amount_mismatches DataFrame: {len(amount_mismatches)} rows")
+                print(f"   • other_matched DataFrame: {len(other_matched)} rows")
+                print(f"   • bank_only DataFrame: {len(bank_only)} rows")
+                print(f"   • qr_only DataFrame: {len(qr_only)} rows")
                 
                 # Add additional analysis columns to mismatched entries
                 if not amount_mismatches.empty:
@@ -492,6 +515,14 @@ class MergeOperationsHandler:
                         'total_qr_amount': minor_matches['qr_amount'].sum() if not minor_matches.empty else 0,
                         'total_difference': minor_matches['amount_difference'].sum() if not minor_matches.empty else 0
                     },
+                    'other_matches': {
+                        'count': len(other_matched),
+                        'data': other_matched,
+                        'total_system_amount': other_matched['system_amount'].sum() if not other_matched.empty else 0,
+                        'total_qr_amount': other_matched['qr_amount'].sum() if not other_matched.empty else 0,
+                        'total_difference': other_matched['amount_difference'].sum() if not other_matched.empty else 0,
+                        'description': 'Phase 3, Stage 2, and other advanced matches'
+                    },
                     'amount_mismatches': {
                         'count': len(amount_mismatches),
                         'data': amount_mismatches,
@@ -515,9 +546,9 @@ class MergeOperationsHandler:
                 # Overall summary statistics
                 summary_stats = {
                     'total_entries': len(full_df),
-                    'total_matched': len(perfect_matches) + len(minor_matches),
+                    'total_matched': len(perfect_matches) + len(minor_matches) + len(other_matched),
                     'total_mismatched': len(amount_mismatches) + len(bank_only) + len(qr_only),
-                    'match_percentage': ((len(perfect_matches) + len(minor_matches)) / len(full_df) * 100) if len(full_df) > 0 else 0,
+                    'match_percentage': ((len(perfect_matches) + len(minor_matches) + len(other_matched)) / len(full_df) * 100) if len(full_df) > 0 else 0,
                     'mismatch_percentage': ((len(amount_mismatches) + len(bank_only) + len(qr_only)) / len(full_df) * 100) if len(full_df) > 0 else 0,
                     'system_higher_count': len(amount_mismatches[amount_mismatches['amount_difference'] > 0]) if not amount_mismatches.empty else 0,
                     'qr_higher_count': len(amount_mismatches[amount_mismatches['amount_difference'] < 0]) if not amount_mismatches.empty else 0
@@ -539,6 +570,7 @@ class MergeOperationsHandler:
                 print(f"   • Total entries: {summary_stats['total_entries']}")
                 print(f"   • Perfect matches: {mismatch_breakdown['perfect_matches']['count']}")
                 print(f"   • Minor matches: {mismatch_breakdown['minor_matches']['count']} (tolerance: ±3)")
+                print(f"   • Other matches: {mismatch_breakdown['other_matches']['count']} (Phase 3, Stage 2)")
                 print(f"   • Amount mismatches: {mismatch_breakdown['amount_mismatches']['count']}")
                 print(f"   • Bank only: {mismatch_breakdown['bank_only']['count']}")
                 print(f"   • QR only: {mismatch_breakdown['qr_only']['count']}")

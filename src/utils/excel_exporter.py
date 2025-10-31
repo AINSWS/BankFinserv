@@ -178,6 +178,14 @@ class ExcelExporter:
                     minor_matches.to_excel(writer, sheet_name='Minor_Matches_Tolerance3', index=False)
                     print(f"   ✓ Minor matches exported ({len(minor_matches)} entries)")
             
+            # Sheet 4.5: Other Matches (Phase 3, Stage 2)
+            if mismatched_analysis and mismatched_analysis.get('mismatch_breakdown'):
+                if 'other_matches' in mismatched_analysis['mismatch_breakdown']:
+                    other_matches = mismatched_analysis['mismatch_breakdown']['other_matches']['data']
+                    if not other_matches.empty:
+                        other_matches.to_excel(writer, sheet_name='Advanced_Matches_Phase3_Stage2', index=False)
+                        print(f"   ✓ Advanced matches exported ({len(other_matches)} entries - Phase 3 & Stage 2)")
+            
             # Sheet 5: Amount Mismatches (REQUIRES INVESTIGATION)
             if mismatched_analysis and mismatched_analysis.get('mismatch_breakdown'):
                 amount_mismatches = mismatched_analysis['mismatch_breakdown']['amount_mismatches']['data']
@@ -222,6 +230,7 @@ class ExcelExporter:
             ['Total Unique Loans', summary.get('total_unique_loans', 0)],
             ['Perfect Matches', summary.get('perfect_matches', 0)],
             ['Minor Matches (±3)', summary.get('minor_matches', 0)],
+            ['Advanced Matches (Phase 3 & Stage 2)', mismatched_analysis.get('mismatch_breakdown', {}).get('other_matches', {}).get('count', 0) if mismatched_analysis else 0],
             ['Total Matches', summary.get('total_matches', 0)],
             ['Match Percentage', f"{summary.get('match_percentage', 0):.1f}%"],
             ['', ''],

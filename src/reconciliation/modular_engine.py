@@ -56,6 +56,9 @@ class ModularReconciliationEngine:
         self.match_finder = MatchFinder()
         self.export_manager = ExportManager()
         self.phase3_processor = Phase3ReconciliationProcessor()
+        
+        # Cache for reconciliation results (to avoid re-running Phase 3)
+        self._cached_reconciliation_result = None
     
     # Bank Ledger Operations
     def extract_bank_ledger_data(self):
@@ -184,15 +187,18 @@ class ModularReconciliationEngine:
                 stage3_input = stage1_mismatches
             
             # Stage 3: Advanced matching on remaining mismatches
+            phase3_applied = False
             if include_phase3 and not stage3_input.empty:
                 print("\n🔄 Starting Stage 3: Advanced Matching...")
                 result = self._apply_phase3_to_main_data(result, stage3_input)
+                phase3_applied = True
             
-            # Update final statistics
+            # Update final statistics using the potentially Phase 3-updated data
+            final_data = result.get('merged_pivot_data', main_data)
             if 'reconciliation_summary' in result:
                 summary = result['reconciliation_summary']
-                total_matches = len(main_data[~main_data[status_col].str.contains('MISMATCH', na=False)])
-                total_records = len(main_data)
+                total_matches = len(final_data[~final_data[status_col].str.contains('MISMATCH', na=False)])
+                total_records = len(final_data)
                 
                 if total_records > 0:
                     match_rate = (total_matches / total_records) * 100
@@ -201,8 +207,13 @@ class ModularReconciliationEngine:
                         'match_percentage': match_rate
                     })
             
-            # Store final data
-            result['merged_pivot_data'] = main_data
+            # Store final data (only if Phase 3 didn't already update it)
+            if not phase3_applied:
+                result['merged_pivot_data'] = main_data
+            
+            # IMPORTANT: Cache the result to avoid re-running Phase 3 during export
+            self._cached_reconciliation_result = result
+            
             return result
             
         except Exception as e:
@@ -219,6 +230,8 @@ class ModularReconciliationEngine:
         """
         Perform complete reconciliation analysis with separate mismatched entries extraction
         Enhanced with ±3 tolerance for minor differences
+        
+        IMPORTANT: Uses cached reconciliation result to preserve Phase 3 updates
         """
         print(f"🔍 Performing complete reconciliation analysis with mismatch extraction...")
         
@@ -231,8 +244,14 @@ class ModularReconciliationEngine:
         }
         
         try:
-            # First, get the complete reconciliation
-            pivot_comparison = self.merge_pivot_tables_comparison()
+            # CRITICAL FIX: Use cached result if available to preserve Phase 3 updates
+            # Otherwise Phase 3 matches get lost when we re-run reconciliation
+            if self._cached_reconciliation_result is not None:
+                print(f"   ✓ Using cached reconciliation result (preserves Phase 3 updates)")
+                pivot_comparison = self._cached_reconciliation_result
+            else:
+                print(f"   ⚠️ No cached result, running fresh reconciliation")
+                pivot_comparison = self.merge_pivot_tables_comparison()
             
             if pivot_comparison['status'] == 'success':
                 # Extract mismatched entries for detailed analysis
