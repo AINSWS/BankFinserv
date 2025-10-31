@@ -9,8 +9,13 @@ import os
 # Add utils directory to path for imports
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'utils'))
 
-from dataframe_splitter import DataFrameSplitter
-from dataframe_groupby import DataFrameGroupBy
+# Import with fallback for both PyInstaller and normal execution
+try:
+    from src.utils.dataframe_splitter import DataFrameSplitter
+    from src.utils.dataframe_groupby import DataFrameGroupBy
+except ModuleNotFoundError:
+    from dataframe_splitter import DataFrameSplitter
+    from dataframe_groupby import DataFrameGroupBy
 
 class BankLedgerProcessor:
     """

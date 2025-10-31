@@ -9,7 +9,11 @@ import os
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, current_dir)
 
-from ui_modular import BankReconciliationUI
+# Import with fallback for both PyInstaller and normal execution
+try:
+    from src.ui_modular import BankReconciliationUI
+except ModuleNotFoundError:
+    from ui_modular import BankReconciliationUI
 
 def main():
     """Main application entry point"""

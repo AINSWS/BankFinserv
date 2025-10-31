@@ -10,8 +10,13 @@ import logging
 # Add utils directory to path for imports
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'utils'))
 
-from dataframe_merger import DataFrameMerger
-from dataframe_groupby import DataFrameGroupBy
+# Import with fallback for both PyInstaller and normal execution
+try:
+    from src.utils.dataframe_merger import DataFrameMerger
+    from src.utils.dataframe_groupby import DataFrameGroupBy
+except ModuleNotFoundError:
+    from dataframe_merger import DataFrameMerger
+    from dataframe_groupby import DataFrameGroupBy
 
 class MergeOperationsHandler:
     """

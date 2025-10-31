@@ -5,8 +5,14 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 from tkinterdnd2 import DND_FILES
 from datetime import datetime
-from ui_styles.theme import UITheme
-from file_handlers.file_manager import FileHandler
+
+# Import with fallback for both PyInstaller and normal execution
+try:
+    from src.ui_styles.theme import UITheme
+    from src.file_handlers.file_manager import FileHandler
+except ModuleNotFoundError:
+    from ui_styles.theme import UITheme
+    from file_handlers.file_manager import FileHandler
 
 class FileSlot:
     """Individual file slot component"""
@@ -122,17 +128,17 @@ class FileSlot:
         )
         browse_btn.pack(side="left", padx=(0, 5))
         
-        # Download button - disabled until file is uploaded
-        download_style = UITheme.get_button_style("secondary")
+        # Template button - always enabled to download sample template
+        template_style = UITheme.get_button_style("secondary")
         template_btn = tk.Button(
             buttons_frame,
-            text="📥 Download",
+            text="� Template",
             command=self._download_template,
             font=UITheme.get_font_config("body"),
-            **download_style,
+            **template_style,
             padx=15,
             pady=8,
-            state="disabled"
+            state="normal"  # Always enabled
         )
         template_btn.pack(side="left", padx=(0, 5))
         
@@ -274,7 +280,7 @@ class FileSlot:
         
         # Update button states
         self.widgets['clear_btn'].configure(state="normal")
-        self.widgets['template_btn'].configure(state="normal")  # Enable download button when file is loaded
+        # Template button is always enabled - no need to change state
         
         # Show file info
         info_text = f"📄 {self.file_data['size']} • {datetime.now().strftime('%H:%M')}"
@@ -282,19 +288,58 @@ class FileSlot:
         self.widgets['info_label'].pack(fill="x", padx=10, pady=(0, 8))
     
     def _download_template(self):
-        """Download a template file based on the currently loaded file or provide a sample"""
-        import pandas as pd
+        """Download a fixed template file for this slot"""
         import os
+        import sys
+        import shutil
         
-        # Ask user where to save the template
+        # Get configuration for this slot
         config = self.FILE_CONFIGS.get(self.slot_number, {})
         file_name = config.get('name', f"File {self.slot_number}").replace('📋 ', '').replace(':', '')
-        default_filename = f"{file_name.replace(' ', '_')}_Template.xlsx"
+        
+        # Define template file names and extensions based on slot number
+        template_info = {
+            1: {"filename": "Bank_Ledger_Template.xlsx", "ext": ".xlsx"},
+            2: {"filename": "SIB_QR_Report_Template.xlsx", "ext": ".xlsx"},
+            3: {"filename": "Demand_Report_Template.csv", "ext": ".csv"}
+        }
+        
+        info = template_info.get(self.slot_number, {"filename": f"Template_{self.slot_number}.xlsx", "ext": ".xlsx"})
+        template_filename = info["filename"]
+        file_extension = info["ext"]
+        
+        # Look for template in templates folder
+        # Check if running as PyInstaller bundle
+        if getattr(sys, 'frozen', False):
+            # Running as compiled executable
+            base_dir = sys._MEIPASS
+        else:
+            # Running as script
+            base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        
+        template_path = os.path.join(base_dir, 'templates', template_filename)
+        
+        # If template doesn't exist, show message
+        if not os.path.exists(template_path):
+            messagebox.showinfo(
+                "Template Not Available",
+                f"📋 Template for {file_name}\n\n"
+                f"Please place the template file at:\n"
+                f"{template_path}\n\n"
+                f"Expected filename: {template_filename}"
+            )
+            return
+        
+        # Ask user where to save the template
+        if file_extension == ".csv":
+            filetypes = [("CSV files", "*.csv"), ("All files", "*.*")]
+        else:
+            filetypes = [("Excel files", "*.xlsx"), ("All files", "*.*")]
         
         file_path = filedialog.asksaveasfilename(
-            defaultextension=".xlsx",
-            initialfile=default_filename,
-            filetypes=[("Excel files", "*.xlsx"), ("All files", "*.*")],
+            defaultextension=file_extension,
+            initialfile=template_filename,
+            filetypes=filetypes,
             title=f"Save {file_name} Template"
         )
         
@@ -302,35 +347,22 @@ class FileSlot:
             return
         
         try:
-            # Download the entire uploaded file for verification
-            if self.file_data and self.file_data.get('data') is not None:
-                # Export the entire uploaded file
-                df = self.file_data['data']
-                
-                # Save the complete file
-                df.to_excel(file_path, index=False, engine='openpyxl')
-                
-                messagebox.showinfo(
-                    "File Downloaded",
-                    f"✅ Complete file downloaded successfully!\n\n"
-                    f"📁 Location: {file_path}\n\n"
-                    f"📊 Total Rows: {len(df):,}\n"
-                    f"📋 Total Columns: {len(df.columns)}\n\n"
-                    f"💡 Use this to verify you uploaded the correct file format.\n"
-                    f"Check column names and data structure match your requirements."
-                )
-            else:
-                # This shouldn't happen as button is disabled, but safety check
-                messagebox.showwarning(
-                    "No File Uploaded",
-                    "Please upload a file first before downloading.\n\n"
-                    "The download button will be enabled after you upload a file."
-                )
+            # Copy the template file to the selected location
+            shutil.copy2(template_path, file_path)
+            
+            messagebox.showinfo(
+                "Template Downloaded",
+                f"✅ Template downloaded successfully!\n\n"
+                f"📁 Location: {file_path}\n\n"
+                f"📋 Template: {file_name}\n\n"
+                f"💡 Fill in your data following the template structure,\n"
+                f"then upload it using the drag & drop area or Browse button."
+            )
         
         except Exception as e:
             messagebox.showerror(
                 "Template Error",
-                f"Failed to create template:\n{str(e)}"
+                f"Failed to download template:\n{str(e)}"
             )
     
     def _clear_file(self):
@@ -341,7 +373,7 @@ class FileSlot:
         self.widgets['status_label'].configure(text="⚪ Empty", fg=UITheme.TEXT_SECONDARY)
         self._set_drag_state(False)
         self.widgets['clear_btn'].configure(state="disabled")
-        self.widgets['template_btn'].configure(state="disabled")  # Disable download button when file is cleared
+        # Template button stays enabled - always available for download
         self.widgets['info_label'].pack_forget()
         
         # Notify parent

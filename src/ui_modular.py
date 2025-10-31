@@ -4,9 +4,15 @@ Modular Bank Reconciliation UI - Main Interface
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 from tkinterdnd2 import TkinterDnD
-from ui_styles.theme import UITheme
-from components.file_slot import FileSlot
 import sys
+
+# Import with fallback for both PyInstaller and normal execution
+try:
+    from src.ui_styles.theme import UITheme
+    from src.components.file_slot import FileSlot
+except ModuleNotFoundError:
+    from ui_styles.theme import UITheme
+    from components.file_slot import FileSlot
 import os
 import pandas as pd
 import logging
@@ -24,7 +30,11 @@ except ImportError:
 sys.path.append(os.path.join(os.path.dirname(__file__)))
 sys.path.append(os.path.join(os.path.dirname(__file__), 'reconciliation'))
 
-from reconciliation.modular_engine import ModularReconciliationEngine
+# Import with fallback for both PyInstaller and normal execution
+try:
+    from src.reconciliation.modular_engine import ModularReconciliationEngine
+except ModuleNotFoundError:
+    from reconciliation.modular_engine import ModularReconciliationEngine
 
 class BankReconciliationUI:
     """Main UI class for bank reconciliation application"""
@@ -626,8 +636,11 @@ class BankReconciliationUI:
                         # Export in bank ledger format
                         print("🏦 Exporting in bank ledger format...")
                         if hasattr(self, 'current_recon_engine') and self.current_recon_engine:
-                            # Use the new bank ledger export
-                            from reconciliation.exporters.export_manager import ExportManager
+                            # Use the new bank ledger export with fallback
+                            try:
+                                from src.reconciliation.exporters.export_manager import ExportManager
+                            except ModuleNotFoundError:
+                                from reconciliation.exporters.export_manager import ExportManager
                             export_mgr = ExportManager()
                             
                             export_path = export_mgr.export_bank_ledger_with_reconciliation(

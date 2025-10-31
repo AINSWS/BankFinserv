@@ -8,11 +8,19 @@ import os
 # Add utils directory to path for imports
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'utils'))
 
-from dataframe_splitter import DataFrameSplitter
-from dataframe_merger import DataFrameMerger
-from dataframe_groupby import DataFrameGroupBy
-from excel_exporter import ExcelExporter
-from processors.process_utils import get_process_info, update_process_info, set_error_message
+# Import with fallback for both PyInstaller and normal execution
+try:
+    from src.utils.dataframe_splitter import DataFrameSplitter
+    from src.utils.dataframe_merger import DataFrameMerger
+    from src.utils.dataframe_groupby import DataFrameGroupBy
+    from src.utils.excel_exporter import ExcelExporter
+    from src.reconciliation.processors.process_utils import get_process_info, update_process_info, set_error_message
+except ModuleNotFoundError:
+    from dataframe_splitter import DataFrameSplitter
+    from dataframe_merger import DataFrameMerger
+    from dataframe_groupby import DataFrameGroupBy
+    from excel_exporter import ExcelExporter
+    from processors.process_utils import get_process_info, update_process_info, set_error_message
 
 class ReconciliationEngine:
     """Handles bank reconciliation operations"""

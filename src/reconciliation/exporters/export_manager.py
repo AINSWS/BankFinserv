@@ -9,7 +9,11 @@ import os
 # Add utils directory to path for imports
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'utils'))
 
-from excel_exporter import ExcelExporter
+# Import with fallback for both PyInstaller and normal execution
+try:
+    from src.utils.excel_exporter import ExcelExporter
+except ModuleNotFoundError:
+    from excel_exporter import ExcelExporter
 
 class ExportManager:
     """

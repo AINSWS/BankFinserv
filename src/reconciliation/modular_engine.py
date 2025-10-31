@@ -13,13 +13,23 @@ sys.path.append(os.path.join(current_dir, 'processors'))
 sys.path.append(os.path.join(current_dir, 'analyzers'))
 sys.path.append(os.path.join(current_dir, 'exporters'))
 
-from bank_ledger_processor import BankLedgerProcessor
-from sib_qr_processor import SIBQRProcessor
-from demand_report_processor import DemandReportProcessor
-from merge_operations import MergeOperationsHandler
-from match_finder import MatchFinder
-from export_manager import ExportManager
-from phase3_processor import Phase3ReconciliationProcessor
+# Import with fallback for both PyInstaller and normal execution
+try:
+    from src.reconciliation.processors.bank_ledger_processor import BankLedgerProcessor
+    from src.reconciliation.processors.sib_qr_processor import SIBQRProcessor
+    from src.reconciliation.processors.demand_report_processor import DemandReportProcessor
+    from src.reconciliation.processors.merge_operations import MergeOperationsHandler
+    from src.reconciliation.analyzers.match_finder import MatchFinder
+    from src.reconciliation.exporters.export_manager import ExportManager
+    from src.reconciliation.processors.phase3_processor import Phase3ReconciliationProcessor
+except ModuleNotFoundError:
+    from processors.bank_ledger_processor import BankLedgerProcessor
+    from processors.sib_qr_processor import SIBQRProcessor
+    from processors.demand_report_processor import DemandReportProcessor
+    from processors.merge_operations import MergeOperationsHandler
+    from analyzers.match_finder import MatchFinder
+    from exporters.export_manager import ExportManager
+    from processors.phase3_processor import Phase3ReconciliationProcessor
 
 class ModularReconciliationEngine:
     """
@@ -537,8 +547,11 @@ class ModularReconciliationEngine:
         print("🏪 Starting Stage 2: Group Payment Reconciliation...")
         
         try:
-            # Import the group payment processor
-            from group_payment_processor import GroupPaymentProcessor
+            # Import the group payment processor with fallback
+            try:
+                from src.reconciliation.processors.group_payment_processor import GroupPaymentProcessor
+            except ModuleNotFoundError:
+                from processors.group_payment_processor import GroupPaymentProcessor
             
             # Get mismatched data if not provided
             if mismatched_data is None:
@@ -999,8 +1012,11 @@ class ModularReconciliationEngine:
             print("❌ Reconciliation failed, cannot export")
             return None
         
-        # Initialize export manager
-        from export_manager import ExportManager
+        # Initialize export manager with fallback
+        try:
+            from src.reconciliation.exporters.export_manager import ExportManager
+        except ModuleNotFoundError:
+            from exporters.export_manager import ExportManager
         export_manager = ExportManager(output_dir)
         
         # Export using new bank ledger format
@@ -1075,8 +1091,11 @@ class ModularReconciliationEngine:
                 analysis_result = self.extract_mismatched_analysis()
                 
                 if analysis_result['status'] == 'success':
-                    # Initialize export manager
-                    from export_manager import ExportManager
+                    # Initialize export manager with fallback
+                    try:
+                        from src.reconciliation.exporters.export_manager import ExportManager
+                    except ModuleNotFoundError:
+                        from exporters.export_manager import ExportManager
                     export_manager = ExportManager(output_dir)
                     
                     # Export to Excel
@@ -1114,7 +1133,11 @@ class ModularReconciliationEngine:
                 pivot_comparison = self.merge_pivot_tables_comparison()
                 
                 if pivot_comparison['status'] == 'success':
-                    from export_manager import ExportManager
+                    # Initialize export manager with fallback
+                    try:
+                        from src.reconciliation.exporters.export_manager import ExportManager
+                    except ModuleNotFoundError:
+                        from exporters.export_manager import ExportManager
                     export_manager = ExportManager(output_dir)
                     
                     # Prepare export data
