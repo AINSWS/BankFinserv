@@ -260,16 +260,17 @@ class BankReconciliationUI:
         
         # Clear all button
         clear_style = UITheme.get_button_style("danger")
-        clear_all_btn = tk.Button(
+        self.clear_all_btn = tk.Button(
             action_inner,
             text="🗑️ Clear All",
             command=self._clear_all_files,
             font=UITheme.get_font_config("subheader"),
             **clear_style,
             padx=30,
-            pady=12
+            pady=12,
+            state="disabled"  # Disabled until files are loaded
         )
-        clear_all_btn.pack(side="right", padx=(15, 0))
+        self.clear_all_btn.pack(side="right", padx=(15, 0))
     
     def _create_results_container(self):
         """Create results display container"""
@@ -304,6 +305,14 @@ class BankReconciliationUI:
     
     def _update_button_states(self):
         """Update button states based on loaded files"""
+        # Enable Clear All button if any files are loaded
+        if len(self.uploaded_files) > 0:
+            danger_style = UITheme.get_button_style("danger")
+            self.clear_all_btn.configure(state="normal", **danger_style)
+        else:
+            disabled_style = UITheme.get_button_style("disabled")
+            self.clear_all_btn.configure(state="disabled", **disabled_style)
+        
         if len(self.uploaded_files) >= 3:
             primary_style = UITheme.get_button_style("primary")
             self.compare_btn.configure(state="normal", **primary_style)

@@ -53,6 +53,7 @@ class UITheme:
                 "bg": UITheme.ACCENT_BLUE,
                 "fg": UITheme.TEXT_PRIMARY,
                 "activebackground": UITheme.ACCENT_BLUE_DARK,
+                "disabledforeground": UITheme.TEXT_PRIMARY,  # Keep white text when disabled
                 "relief": "flat",
                 "cursor": "hand2"
             },
@@ -60,6 +61,7 @@ class UITheme:
                 "bg": UITheme.SUCCESS_GREEN,
                 "fg": UITheme.TEXT_PRIMARY,
                 "activebackground": UITheme.ACCENT_BLUE_DARK,
+                "disabledforeground": UITheme.TEXT_PRIMARY,  # Keep white text when disabled
                 "relief": "flat",
                 "cursor": "hand2"
             },
@@ -67,13 +69,25 @@ class UITheme:
                 "bg": UITheme.ERROR_RED,
                 "fg": UITheme.TEXT_PRIMARY,
                 "activebackground": "#ff9500",
+                "disabledforeground": UITheme.TEXT_PRIMARY,  # Keep white text when disabled
+                "relief": "flat",
+                "cursor": "hand2"
+            },
+            "secondary": {
+                "bg": UITheme.BACKGROUND_LIGHT,
+                "fg": UITheme.TEXT_PRIMARY,
+                "activebackground": UITheme.BACKGROUND_MEDIUM,
+                "disabledforeground": UITheme.TEXT_PRIMARY,  # Keep white text when disabled
                 "relief": "flat",
                 "cursor": "hand2"
             },
             "disabled": {
-                "bg": "#5a6270",
-                "fg": UITheme.TEXT_SECONDARY,
-                "relief": "flat"
+                "bg": "#808080",  # Gray background for disabled state
+                "fg": UITheme.TEXT_PRIMARY,
+                "activebackground": "#808080",
+                "disabledforeground": UITheme.TEXT_PRIMARY,  # White text when disabled
+                "relief": "flat",
+                "cursor": "arrow"
             }
         }
         return styles.get(button_type, styles["primary"])

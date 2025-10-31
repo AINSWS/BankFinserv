@@ -129,10 +129,10 @@ class FileSlot:
         browse_btn.pack(side="left", padx=(0, 5))
         
         # Template button - always enabled to download sample template
-        template_style = UITheme.get_button_style("secondary")
+        template_style = UITheme.get_button_style("primary")
         template_btn = tk.Button(
             buttons_frame,
-            text="� Template",
+            text="📄 Template",
             command=self._download_template,
             font=UITheme.get_font_config("body"),
             **template_style,
