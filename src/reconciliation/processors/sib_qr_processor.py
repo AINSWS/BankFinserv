@@ -24,15 +24,32 @@ class SIBQRProcessor:
         self.splitter = DataFrameSplitter()
     
     def detect_columns(self, df: pd.DataFrame, patterns: dict) -> dict:
-        """Detect columns based on name patterns"""
+        """
+        Detect columns based on name patterns with aggressive normalization
+        Handles: spaces, underscores, hyphens, dots, case variations, trailing spaces
+        """
         detected = {}
-        df_columns_lower = [col.lower() for col in df.columns]
+        
+        # Normalize function: remove all spaces, underscores, special chars, lowercase
+        def normalize(text):
+            if text is None:
+                return ""
+            normalized = str(text).lower().strip()
+            # Remove all special characters and spaces
+            for char in [' ', '_', '-', '.', '(', ')', '[', ']', '{', '}', ':', ';', ',', '\t', '\n']:
+                normalized = normalized.replace(char, '')
+            return normalized
+        
+        # Normalize actual DataFrame column names
+        df_columns_normalized = [normalize(col) for col in df.columns]
         
         for key, pattern_list in patterns.items():
             matches = []
             for pattern in pattern_list:
-                for i, col in enumerate(df_columns_lower):
-                    if pattern.lower() in col and df.columns[i] not in [match for matches_list in detected.values() for match in matches_list]:
+                pattern_normalized = normalize(pattern)
+                for i, col_norm in enumerate(df_columns_normalized):
+                    # Check if pattern matches and column hasn't been used yet
+                    if pattern_normalized in col_norm and df.columns[i] not in [match for matches_list in detected.values() for match in matches_list]:
                         matches.append(df.columns[i])
                         break
             if matches:
@@ -47,12 +64,14 @@ class SIBQRProcessor:
         referenceID refers to loan ID for matching with demand report
         """
         column_patterns = {
-            'tran_date': ['trandate', 'tran_date', 'transaction_date', 'date'],
-            'payer_vpa': ['payervpa', 'payer_vpa', 'vpa', 'upi_id'],
-            'payer_name': ['payername', 'payer_name', 'name', 'customer_name'],
-            'rrn': ['rrn', 'reference_retrieval_number', 'txn_ref'],
-            'reference_id': ['referenceid', 'reference_id', 'refrence_id', 'refrence_number', 'loan_id', 'lanid'],
-            'amount': ['amount', 'value', 'transaction_amount', 'txn_amount']
+            'tran_date': ['trandate', 'tran date', 'tran_date', 'transaction date', 'transactiondate', 'transaction_date', 'date', 'txn date', 'txndate'],
+            'payer_vpa': ['payervpa', 'payer vpa', 'payer_vpa', 'vpa', 'upi id', 'upiid', 'upi_id'],
+            'payer_name': ['payername', 'payer name', 'payer_name', 'name', 'customer name', 'customername', 'customer_name', 'member name', 'membername'],
+            'rrn': ['rrn', 'reference retrieval number', 'referenceretrievalnumber', 'reference_retrieval_number', 'txn ref', 'txnref', 'txn_ref', 'transaction reference'],
+            'reference_id': ['referenceid', 'reference id', 'reference_id', 'refrence id', 'refrenceid', 'refrence_id', 'refrence number', 'refrencenumber', 'refrence_number', 
+                           'loan id', 'loanid', 'loan_id', 'loan number', 'loannumber', 'loan_number', 
+                           'lan id', 'lanid', 'lan_id', 'lan number', 'lannumber', 'lan_number'],
+            'amount': ['amount', 'value', 'transaction amount', 'transactionamount', 'transaction_amount', 'txn amount', 'txnamount', 'txn_amount', 'total', 'sum']
         }
         
         detected_columns = self.detect_columns(self.sib_qr_df, column_patterns)
@@ -94,12 +113,15 @@ class SIBQRProcessor:
         return result
     
     def _process_reference_ids(self, reference_col: str):
-        """Process and clean reference IDs using DataFrameSplitter"""
+        """Process and clean reference IDs - creates calculated column with calc_ prefix"""
         processed_df = self.sib_qr_df.copy()
         
-        # Apply basic reference ID cleaning
-        # Since SIB QR reference IDs are usually already clean, we'll validate and clean them directly
-        processed_df['reference_id_clean'] = processed_df[reference_col].apply(self._clean_reference_id)
+        # CALCULATED VALUE - cleaned/validated reference ID
+        # Use calc_ prefix to distinguish from direct file column
+        processed_df['calc_reference_id_clean'] = processed_df[reference_col].apply(self._clean_reference_id)
+        
+        # Keep reference_id_clean for backward compatibility
+        processed_df['reference_id_clean'] = processed_df['calc_reference_id_clean']
         
         clean_result = {
             'status': 'success',

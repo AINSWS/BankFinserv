@@ -16,15 +16,32 @@ class DemandReportProcessor:
         self.demand_report_df = demand_report_df
     
     def detect_columns(self, df: pd.DataFrame, patterns: dict) -> dict:
-        """Detect columns based on name patterns - returns first match for each field"""
+        """
+        Detect columns based on name patterns with aggressive normalization
+        Handles: spaces, underscores, hyphens, dots, case variations, trailing spaces
+        Returns single column name per field (not list)
+        """
         detected = {}
-        df_columns_lower = [col.lower() for col in df.columns]
-        used_columns = set()  # Track already used columns
+        used_columns = set()
+        
+        # Normalize function: remove all spaces, underscores, special chars, lowercase
+        def normalize(text):
+            if text is None:
+                return ""
+            normalized = str(text).lower().strip()
+            # Remove all special characters and spaces
+            for char in [' ', '_', '-', '.', '(', ')', '[', ']', '{', '}', ':', ';', ',', '\t', '\n']:
+                normalized = normalized.replace(char, '')
+            return normalized
+        
+        # Normalize actual DataFrame column names
+        df_columns_normalized = [normalize(col) for col in df.columns]
         
         for key, pattern_list in patterns.items():
             for pattern in pattern_list:
-                for i, col in enumerate(df_columns_lower):
-                    if pattern.lower() in col and df.columns[i] not in used_columns:
+                pattern_normalized = normalize(pattern)
+                for i, col_norm in enumerate(df_columns_normalized):
+                    if pattern_normalized in col_norm and df.columns[i] not in used_columns:
                         detected[key] = df.columns[i]  # Return single column name
                         used_columns.add(df.columns[i])
                         break
@@ -40,12 +57,12 @@ class DemandReportProcessor:
         Used for merging with SIB QR report based on loan_id
         """
         column_patterns = {
-            'loan_id': ['loan id', 'loan_id', 'loanid', 'lan_id', 'lanid', 'loan_no', 'account_no'],
-            'branch_name': ['branch', 'mbri_name', 'branchname', 'branch_name', 'office'],
-            'group_name': ['group no', 'group_no', 'groupno', 'mgi_name', 'group_name', 'group', 'group_id'],
-            'member_name': ['mvi name', 'mvi_name', 'mviname', 'mmi_name', 'member_name', 'mamber_name', 'customer_name', 'name'],
-            'amount': ['mldi_amount', 'textbox40', 'outstanding', 'balance', 'demand_amount', 'mls_rdamount', 'amount'],
-            'due_date': ['due_date', 'maturity_date', 'payment_date']
+            'loan_id': ['loan id', 'loanid', 'loan_id', 'lan id', 'lanid', 'lan_id', 'loan no', 'loanno', 'loan_no', 'account no', 'accountno', 'account_no', 'loan number'],
+            'branch_name': ['branch', 'branch name', 'branchname', 'mbri name', 'mbriname', 'mbri_name', 'branch_name', 'office', 'office name'],
+            'group_name': ['group no', 'groupno', 'group_no', 'mgi name', 'mginame', 'mgi_name', 'group name', 'groupname', 'group_name', 'group', 'group id', 'groupid', 'group_id'],
+            'member_name': ['mvi name', 'mviname', 'mvi_name', 'mmi name', 'mminame', 'mmi_name', 'member name', 'membername', 'member_name', 'mamber name', 'mambername', 'mamber_name', 'customer name', 'customername', 'customer_name', 'name'],
+            'amount': ['mldi amount', 'mldiamount', 'mldi_amount', 'textbox40', 'outstanding', 'balance', 'demand amount', 'demandamount', 'demand_amount', 'mls rdamount', 'mlsrdamount', 'mls_rdamount', 'amount', 'total'],
+            'due_date': ['due date', 'duedate', 'due_date', 'maturity date', 'maturitydate', 'maturity_date', 'payment date', 'paymentdate', 'payment_date']
         }
         
         detected_columns = self.detect_columns(self.demand_report_df, column_patterns)
@@ -92,10 +109,13 @@ class DemandReportProcessor:
         # Extract the DataFrame
         extracted_df = self.demand_report_df[columns_to_extract].copy()
         
-        # Clean loan_id column
+        # CALCULATED VALUE - Clean loan_id column
+        # Use calc_ prefix to distinguish from direct file column
         if detected_columns.get('loan_id'):
             loan_id_col = detected_columns['loan_id']  # Single string, not list
-            extracted_df['loan_id_clean'] = extracted_df[loan_id_col].apply(self._clean_loan_id)
+            extracted_df['calc_loan_id_clean'] = extracted_df[loan_id_col].apply(self._clean_loan_id)
+            # Keep loan_id_clean for backward compatibility
+            extracted_df['loan_id_clean'] = extracted_df['calc_loan_id_clean']
         
         return extracted_df
     

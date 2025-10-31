@@ -255,12 +255,14 @@ class MergeOperationsHandler:
         return result
     
     def _get_sib_merge_column(self, sib_df):
-        """Get the merge column from SIB QR Report DataFrame"""
+        """Get the merge column from SIB QR Report DataFrame - handles calc_ prefixed columns"""
         if sib_df is None or sib_df.empty:
             return None
             
         # Common patterns for loan ID in SIB reports
-        loan_id_patterns = ['referenceID', 'reference_id', 'loan_id', 'loanid', 'lan_id', 'lanid']
+        # Priority: cleaned columns first, then raw columns
+        loan_id_patterns = ['calc_reference_id_clean', 'reference_id_clean', 
+                           'referenceID', 'reference_id', 'loan_id', 'loanid', 'lan_id', 'lanid']
         
         for pattern in loan_id_patterns:
             matching_cols = [col for col in sib_df.columns if pattern.lower() in col.lower()]
@@ -275,12 +277,14 @@ class MergeOperationsHandler:
         return None
     
     def _get_demand_merge_column(self, demand_df):
-        """Get the merge column from Demand Report DataFrame"""
+        """Get the merge column from Demand Report DataFrame - handles calc_ prefixed columns"""
         if demand_df is None or demand_df.empty:
             return None
             
         # Common patterns for loan ID in demand reports
-        loan_id_patterns = ['loan_id', 'loanid', 'lan_id', 'lanid', 'loan_no', 'account_no']
+        # Priority: cleaned columns first, then raw columns
+        loan_id_patterns = ['calc_loan_id_clean', 'loan_id_clean', 
+                           'loan_id', 'loanid', 'lan_id', 'lanid', 'loan_no', 'account_no']
         
         for pattern in loan_id_patterns:
             matching_cols = [col for col in demand_df.columns if pattern.lower() in col.lower()]
@@ -549,8 +553,13 @@ class MergeOperationsHandler:
         return result
     
     def _find_loan_id_column(self, df):
-        """Find loan ID column in DataFrame"""
-        loan_id_patterns = ['loan_id', 'reference_id', 'referenceID', 'loanid', 'lan_id', 'lanid']
+        """Find loan_id column in DataFrame - handles calc_ prefixed columns"""
+        # Priority 1: Standard loan_id (already renamed from calc_loan_id in pivot)
+        # Priority 2: Cleaned columns (calc_loan_id_clean, loan_id_clean)
+        # Priority 3: Other variations
+        loan_id_patterns = ['loan_id', 'calc_loan_id_clean', 'loan_id_clean', 
+                           'calc_reference_id_clean', 'reference_id_clean',
+                           'reference_id', 'referenceID', 'loanid', 'lan_id', 'lanid']
         
         for pattern in loan_id_patterns:
             matching_cols = [col for col in df.columns if pattern.lower() in col.lower()]
@@ -583,8 +592,10 @@ class MergeOperationsHandler:
         return None
     
     def _find_reference_id_column(self, df):
-        """Find reference ID column in DataFrame"""
-        ref_patterns = ['reference_id', 'referenceID', 'loan_id', 'loanid', 'lan_id', 'lanid']
+        """Find reference ID column in DataFrame - handles calc_ prefixed columns"""
+        # Priority 1: Look for cleaned/calculated columns (calc_reference_id_clean, reference_id_clean)
+        ref_patterns = ['reference_id_clean', 'calc_reference_id_clean', 'loan_id_clean', 'calc_loan_id_clean',
+                       'reference_id', 'referenceID', 'loan_id', 'loanid', 'lan_id', 'lanid']
         
         for pattern in ref_patterns:
             matching_cols = [col for col in df.columns if pattern.lower() in col.lower()]

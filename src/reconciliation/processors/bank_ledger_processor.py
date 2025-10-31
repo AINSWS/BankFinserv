@@ -53,7 +53,9 @@ class BankLedgerProcessor:
         """
         column_patterns = {
             'narration': ['narration', 'description', 'particulars', 'details', 'remark'],
-            'amount': ['amount', 'rate', 'value', 'debit', 'credit', 'dr', 'cr'],
+            # IMPORTANT: Prioritize 'debit' over other amount columns for bank ledger
+            # This ensures we use Debit column instead of 'Qr Recevied Amount' or other columns
+            'amount': ['debit', 'dr', 'credit', 'cr', 'amount', 'rate', 'value'],
             'date': ['date', 'transaction_date', 'value_date', 'posting_date'],
             'reference': ['reference', 'ref', 'transaction_id', 'txn_id', 'cheque_no']
         }
