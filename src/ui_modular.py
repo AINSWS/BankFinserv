@@ -1,4 +1,4 @@
-"""
+﻿"""
 Modular Bank Reconciliation UI - Main Interface
 """
 import tkinter as tk
@@ -234,7 +234,7 @@ class BankReconciliationUI:
         export_style = UITheme.get_button_style("disabled")
         self.export_btn = tk.Button(
             action_inner,
-            text="📊 Export to Excel",
+            text="⬇️ Export to Excel",
             command=self._export_results,
             font=UITheme.get_font_config("subheader"),
             **export_style,
@@ -470,6 +470,83 @@ class BankReconciliationUI:
         try:
             summary = results.get('reconciliation_summary', {})
             
+            # Get totals
+            total_matched = summary.get('total_matches', 0)
+            total_mismatches = summary.get('amount_mismatches', 0)
+            match_rate = summary.get('match_percentage', 0)
+            
+            # Check if both matched and mismatched are 0 - likely incorrect file format
+            if total_matched == 0 and total_mismatches == 0:
+                error_container = tk.Frame(parent, bg=UITheme.BACKGROUND_DARK)
+                error_container.pack(fill="both", expand=True, padx=20, pady=40)
+                
+                # Error icon
+                tk.Label(
+                    error_container,
+                    text="⚠️",
+                    font=("Segoe UI", 48),
+                    fg=UITheme.WARNING_ORANGE,
+                    bg=UITheme.BACKGROUND_DARK
+                ).pack(pady=(20, 10))
+                
+                # Error title
+                tk.Label(
+                    error_container,
+                    text="No Records Found",
+                    font=UITheme.get_font_config("header"),
+                    fg=UITheme.TEXT_PRIMARY,
+                    bg=UITheme.BACKGROUND_DARK
+                ).pack(pady=5)
+                
+                # Error message
+                error_msg = tk.Label(
+                    error_container,
+                    text="Please check your uploaded files and make sure they follow the template format.\n\nTo download the template, please click on the '📄 Template' button\navailable in each file upload section.",
+                    font=UITheme.get_font_config("body"),
+                    fg=UITheme.TEXT_SECONDARY,
+                    bg=UITheme.BACKGROUND_DARK,
+                    justify="center",
+                    wraplength=600
+                )
+                error_msg.pack(pady=10)
+                
+                # Suggestion box
+                suggestion_frame = tk.Frame(error_container, bg=UITheme.BACKGROUND_MEDIUM, relief="solid", bd=1)
+                suggestion_frame.pack(pady=20, padx=50, fill="x")
+                
+                tk.Label(
+                    suggestion_frame,
+                    text=" ⚠️ Common Issues:",
+                    font=UITheme.get_font_config("subheader"),
+                    fg=UITheme.ACCENT_BLUE,
+                    bg=UITheme.BACKGROUND_MEDIUM
+                ).pack(pady=(10, 5), anchor="w", padx=15)
+                
+                issues = [
+                    "⚠️ Wrong file format or structure",
+                    "⚠️ Missing required columns (Loan ID, Amount, etc.)",
+                    "⚠️ Empty or corrupted files",
+                    "⚠️ Files uploaded in wrong order"
+                ]
+                
+                for issue in issues:
+                    tk.Label(
+                        suggestion_frame,
+                        text=issue,
+                        font=UITheme.get_font_config("body"),
+                        fg=UITheme.TEXT_PRIMARY,
+                        bg=UITheme.BACKGROUND_MEDIUM,
+                        anchor="w"
+                    ).pack(pady=2, anchor="w", padx=30)
+                
+                tk.Label(
+                    suggestion_frame,
+                    text=" ",
+                    bg=UITheme.BACKGROUND_MEDIUM
+                ).pack(pady=5)
+                
+                return
+            
             # Create cards container
             cards_container = tk.Frame(parent, bg=UITheme.BACKGROUND_DARK)
             cards_container.pack(fill="x", padx=20, pady=10)
@@ -477,11 +554,6 @@ class BankReconciliationUI:
             # Configure grid for two equal columns
             cards_container.grid_columnconfigure(0, weight=1)
             cards_container.grid_columnconfigure(1, weight=1)
-            
-            # Get totals
-            total_matched = summary.get('total_matches', 0)
-            total_mismatches = summary.get('amount_mismatches', 0)
-            match_rate = summary.get('match_percentage', 0)
             
             # Create matched records card
             matched_card = tk.Frame(cards_container, bg=UITheme.BACKGROUND_MEDIUM, relief="solid", bd=1)
@@ -547,31 +619,6 @@ class BankReconciliationUI:
                     bg=UITheme.BACKGROUND_MEDIUM
                 ).pack(pady=5)
             
-            # Stage 2 Results (Group Payment Distribution)
-            if 'stage2_results' in results:
-                stage2_results = results['stage2_results']
-                if stage2_results and stage2_results.get('status') == 'success' and stage2_results.get('newly_matched') is not None and not stage2_results['newly_matched'].empty:
-                    # Only show if there are actual group matches
-                    group_frame = tk.Frame(cards_container, bg=UITheme.BACKGROUND_MEDIUM, relief="solid", bd=1)
-                    group_frame.grid(row=1, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
-                    
-                    group_matches = len(stage2_results['newly_matched'])
-                    
-                    tk.Label(
-                        group_frame,
-                        text=f"✅ Group Payment Matches: {group_matches}",
-                        font=UITheme.get_font_config("subheader"),
-                        fg=UITheme.ACCENT_BLUE,
-                        bg=UITheme.BACKGROUND_MEDIUM
-                    ).pack(pady=5)
-                    
-                    # Show the group payment details in a table
-                    self._create_simple_data_table(
-                        group_frame, 
-                        "Group Payment Details", 
-                        stage2_results['newly_matched']
-                    )
-            
         except Exception as e:
             error_msg = f"Error displaying results: {str(e)}"
             logging.error(error_msg, exc_info=True)
@@ -630,7 +677,7 @@ class BankReconciliationUI:
             
             tk.Radiobutton(
                 export_dialog,
-                text="🏦 Bank Ledger Format (with Credit/Debit/Remarks)",
+                text="📋 Bank Ledger Format (with Credit/Debit/Remarks)",
                 variable=export_format,
                 value="bank_ledger",
                 font=("Arial", 10)
@@ -643,7 +690,7 @@ class BankReconciliationUI:
                 try:
                     if selected_format == "bank_ledger":
                         # Export in bank ledger format
-                        print("🏦 Exporting in bank ledger format...")
+                        print("📋 Exporting in bank ledger format...")
                         if hasattr(self, 'current_recon_engine') and self.current_recon_engine:
                             # Use the new bank ledger export with fallback
                             try:
@@ -906,16 +953,16 @@ class BankReconciliationUI:
     def _apply_clean_formatting(self, file_path):
         """Apply clean, visible formatting to Excel file"""
         if not OPENPYXL_AVAILABLE:
-            print("⚠️ Skipping formatting - openpyxl not available")
+            print(" Skipping formatting - openpyxl not available")
             return
             
         try:
-            print(f"🔧 Starting formatting for: {file_path}")
+            print(f"📋 Starting formatting for: {file_path}")
             
             # Load the workbook
             print(f"📂 Loading workbook...")
             wb = load_workbook(file_path)
-            print(f"📋 Sheets found: {wb.sheetnames}")
+            print(f"📊 Sheets found: {wb.sheetnames}")
             
             # Define clean colors
             matched_fill = PatternFill(start_color="C6EFCE", end_color="C6EFCE", fill_type="solid")  # Light green
@@ -924,7 +971,7 @@ class BankReconciliationUI:
             header_font = Font(bold=True)
             
             for sheet_name in wb.sheetnames:
-                print(f"🎨 Processing sheet: {sheet_name}")
+                print(f"📄 Processing sheet: {sheet_name}")
                 ws = wb[sheet_name]
                 
                 # Apply auto-filter to make it visible - with safe checks
@@ -949,7 +996,7 @@ class BankReconciliationUI:
                             cell = ws.cell(row=1, column=col)
                             cell.fill = header_fill
                             cell.font = header_font
-                        print(f"   🎨 Headers formatted (columns 1-{max_col})")
+                        print(f"   📊 Headers formatted (columns 1-{max_col})")
                     else:
                         print(f"   ⚠️ No columns found in sheet {sheet_name}")
                 except Exception as col_error:
@@ -967,7 +1014,7 @@ class BankReconciliationUI:
                         for row in range(2, row_limit):
                             for col in range(1, max_col + 1):
                                 ws.cell(row=row, column=col).fill = matched_fill
-                        print(f"   🟢 Applied green background to {row_limit-2} rows")
+                        print(f"    Applied green background to {row_limit-2} rows")
                                 
                     elif 'Mismatched' in sheet_name and max_row and max_col and max_row > 1:
                         # Light red for mismatched records (limit rows for performance)
@@ -996,10 +1043,10 @@ class BankReconciliationUI:
                                 elif status_value and 'MISMATCH' in str(status_value):
                                     for col in range(1, max_col + 1):
                                         ws.cell(row=row, column=col).fill = mismatch_fill
-                            print(f"   🎨 Applied conditional coloring to {row_limit-2} rows")
+                            print(f"   📊 Applied conditional coloring to {row_limit-2} rows")
                 
                 except Exception as color_error:
-                    print(f"   ⚠️ Could not apply row coloring to {sheet_name}: {color_error}")
+                    print(f"   ⚠️ Could not apply row coloring to {sheet_name}: {color_error}")                
                 
                 # Auto-adjust column widths for better visibility - with safe checks
                 try:

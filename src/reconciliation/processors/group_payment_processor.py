@@ -134,21 +134,28 @@ class GroupPaymentProcessor:
     def _identify_matching_groups(self, group_summary: pd.DataFrame) -> List[str]:
         """
         Identify groups where total QR collection matches total system requirement
-        or where there is a group-level payment pattern
+        ONLY match groups where the totals are equal (within ±3 tolerance)
         """
         matching_groups = []
+        TOLERANCE = 3  # Allow only ±3 difference
         
         for _, row in group_summary.iterrows():
-            # A group is considered matching if:
-            # 1. The total QR collection equals total system requirement
-            # 2. OR there is at least one payment made for the group
+            # A group is considered matching ONLY if:
+            # 1. The total QR collection equals total system requirement (within ±3)
+            # 2. Has more than 1 member (actual group)
+            # 3. Both system and QR have positive values
+            difference = abs(row['total_qr_collection'] - row['total_system_entry'])
+            
             if (row['total_qr_collection'] > 0 and 
+                row['total_system_entry'] > 0 and
                 row['member_count'] > 1 and
-                abs(row['total_qr_collection'] - row['total_system_entry']) < row['total_system_entry'] * 0.5):  # Allow up to 50% difference
+                difference <= TOLERANCE):  # Only match if totals are equal within tolerance
                 matching_groups.append(row['group_id'])
                 self.logger.info(f"Group {row['group_id']}: Members={row['member_count']}, "
                                f"System={row['total_system_entry']}, QR={row['total_qr_collection']}, "
-                               f"Diff={row['group_difference']} (MATCH)")
+                               f"Diff={row['group_difference']} (MATCHED)")
+            else:
+                self.logger.debug(f"Group {row['group_id']}: Skipped - Diff={difference:.2f} exceeds tolerance")
         
         return matching_groups
     
@@ -162,9 +169,11 @@ class GroupPaymentProcessor:
             
         total_qr = group_records['qr_collection'].sum()
         total_system = group_records['system_entry'].sum()
+        TOLERANCE = 3  # Allow only ±3 difference
         
-        # Skip if either total is 0 or if totals are significantly different
-        if total_qr == 0 or total_system == 0 or abs(total_qr - total_system) > total_system * 0.5:
+        # Skip if either total is 0 or if totals don't match within tolerance
+        if total_qr == 0 or total_system == 0 or abs(total_qr - total_system) > TOLERANCE:
+            self.logger.debug(f"Skipping group redistribution: QR={total_qr}, System={total_system}, Diff={abs(total_qr - total_system)}")
             return []
             
         redistributed_records = []

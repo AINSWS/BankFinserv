@@ -194,40 +194,37 @@ class Phase3ReconciliationProcessor:
     
     def _extract_loan_id_from_parts(self, narration_parts: List[str], full_narration: str, transaction_type: str) -> Optional[str]:
         """
-        Extract loan ID from narration parts based on transaction type
+        Extract loan ID from narration parts - searches ALL positions regardless of transaction type
         
         Args:
             narration_parts: List of parts after splitting narration by '/'
             full_narration: Original full narration text
-            transaction_type: 'debit' or 'credit'
+            transaction_type: 'debit' or 'credit' (not used - kept for compatibility)
         
         Returns:
             Loan ID as string if found, None otherwise
         """
         import re
         
-        if transaction_type == 'debit':
-            # For DEBIT: Try position 1 first, then position 2
-            for pos in [1, 2]:
-                if len(narration_parts) > pos:
-                    potential_id = narration_parts[pos].strip()
-                    if potential_id.isdigit() and len(potential_id) >= 5:  # Valid loan ID
-                        return potential_id
-                        
-        elif transaction_type == 'credit':
-            # For CREDIT: Try position 2, then 3, then search for embedded loan ID
-            for pos in [2, 3]:
-                if len(narration_parts) > pos:
-                    potential_id = narration_parts[pos].strip()
-                    if potential_id.isdigit() and len(potential_id) >= 5:  # Valid loan ID
-                        return potential_id
-            
-            # If not found in standard positions, search for embedded loan ID in first part
-            if narration_parts:
-                # Look for patterns like "RD AMOUNT WITHDRAW FROM 181669"
-                loan_id_match = re.search(r'\b(\d{6})\b', narration_parts[0])
-                if loan_id_match:
-                    return loan_id_match.group(1)
+        # Search for loan ID in ANY position within the narration parts
+        # Try each part in order until we find a valid loan ID
+        for part in narration_parts:
+            potential_id = part.strip()
+            # Check if it's a valid loan ID: all digits and at least 5 characters long
+            if potential_id.isdigit() and len(potential_id) >= 5:
+                return potential_id
+        
+        # If not found in split parts, search the full narration for numeric patterns
+        # Look for 5-6 digit loan IDs embedded anywhere in the text
+        loan_id_patterns = [
+            r'\b(\d{6})\b',  # 6-digit loan ID
+            r'\b(\d{5})\b'   # 5-digit loan ID
+        ]
+        
+        for pattern in loan_id_patterns:
+            match = re.search(pattern, full_narration)
+            if match:
+                return match.group(1)
         
         return None
     
