@@ -116,6 +116,16 @@ class DemandReportProcessor:
             extracted_df['calc_loan_id_clean'] = extracted_df[loan_id_col].apply(self._clean_loan_id)
             # Keep loan_id_clean for backward compatibility
             extracted_df['loan_id_clean'] = extracted_df['calc_loan_id_clean']
+            
+            # IMPORTANT: Remove duplicate loan IDs from Demand Report
+            # Keep first occurrence to avoid many-to-many merge issues
+            # which would duplicate QR amounts during pivot sum
+            original_count = len(extracted_df)
+            extracted_df = extracted_df.drop_duplicates(subset=['loan_id_clean'], keep='first')
+            duplicates_removed = original_count - len(extracted_df)
+            
+            if duplicates_removed > 0:
+                print(f"ℹ️ Demand Report: Removed {duplicates_removed} duplicate loan IDs (keeping first occurrence)")
         
         return extracted_df
     

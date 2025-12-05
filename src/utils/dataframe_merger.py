@@ -83,15 +83,31 @@ class DataFrameMerger:
             right_size = len(right_df)
             
             # Perform the merge
-            merged_df = pd.merge(
-                left_df,
-                right_df,
-                left_on=left_col,
-                right_on=right_col,
-                how=how,
-                suffixes=suffixes,
-                validate='m:m'  # Many-to-many merge
-            )
+            # Use many-to-one (m:1) for SIB QR (many transactions) + Demand (one per loan_id)
+            # This ensures each SIB transaction gets enriched with loan info, not duplicated
+            try:
+                merged_df = pd.merge(
+                    left_df,
+                    right_df,
+                    left_on=left_col,
+                    right_on=right_col,
+                    how=how,
+                    suffixes=suffixes,
+                    validate='m:1'  # Many-to-one: many SIB transactions to one Demand entry per loan
+                )
+            except pd.errors.MergeError as e:
+                # If m:1 fails (right has duplicates), log warning and deduplicate right
+                self.logger.warning(f"Many-to-one merge failed: {e}. Deduplicating right DataFrame...")
+                right_df_dedup = right_df.drop_duplicates(subset=[right_col], keep='first')
+                merged_df = pd.merge(
+                    left_df,
+                    right_df_dedup,
+                    left_on=left_col,
+                    right_on=right_col,
+                    how=how,
+                    suffixes=suffixes,
+                    validate='m:1'
+                )
             
             # Calculate merge statistics
             merge_stats = self._calculate_merge_stats(

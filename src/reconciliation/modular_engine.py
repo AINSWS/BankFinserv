@@ -138,12 +138,10 @@ class ModularReconciliationEngine:
                 main_data[status_col].str.contains('MISMATCH', na=False)
             ].copy()
             
-            print(f"Stage 1 Complete - Found {len(stage1_mismatches)} mismatches")
+            print(f"✅ Stage 1 Complete - Found {len(stage1_mismatches)} mismatches out of {len(main_data)} total records")
             
             # Stage 2: Group payment processing on mismatches from Stage 1
             if include_stage2 and not stage1_mismatches.empty:
-                print("\n🔄 Starting Stage 2: Group Payment Processing...")
-                
                 # Rename columns for Stage 2 processing
                 stage1_mismatches = stage1_mismatches.rename(columns={
                     'system_amount': 'system_entry',
@@ -159,12 +157,9 @@ class ModularReconciliationEngine:
                     remaining_mismatches = stage2_result.get('remaining_mismatched', pd.DataFrame())
                     
                     if not newly_matched.empty:
-                        print(f"Stage 2 found {len(newly_matched)} matches")
-                        
                         # Make sure all needed columns exist
                         required_cols = ['loan_id', 'status', 'qr_collection', 'system_entry', 'difference']
                         if all(col in newly_matched.columns for col in required_cols):
-                            print("✓ Stage 2 data contains all required columns")
                             # Update matched records in main data
                             for idx, row in newly_matched.iterrows():
                                 mask = main_data['loan_id'] == row['loan_id']
@@ -176,14 +171,6 @@ class ModularReconciliationEngine:
                                     for col in ['qr_collection', 'system_entry', 'difference', 'match_type', 'notes']:
                                         if col in row and col in main_data.columns:
                                             main_data.loc[mask, col] = row[col]
-                                    
-                                    # Log the update for debugging
-                                    print(f"Updated {row['loan_id']} - Status: {row['status']}, "
-                                          f"QR: {row['qr_collection']}, System: {row['system_entry']}")
-                        else:
-                            missing_cols = [col for col in required_cols if col not in newly_matched.columns]
-                            print(f"⚠️ Warning: Missing columns in Stage 2 results: {missing_cols}")
-                            print(f"Available columns: {newly_matched.columns.tolist()}")
                     
                     # Store Stage 2 results
                     result['stage2_results'] = stage2_result
@@ -191,7 +178,6 @@ class ModularReconciliationEngine:
                     # Pass remaining mismatches to Stage 3
                     stage3_input = remaining_mismatches
                 else:
-                    print(f"Stage 2 failed: {stage2_result.get('message', 'Unknown error')}")
                     stage3_input = stage1_mismatches
             else:
                 stage3_input = stage1_mismatches

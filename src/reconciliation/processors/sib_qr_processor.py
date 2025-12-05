@@ -105,14 +105,33 @@ class SIBQRProcessor:
             if 'reference_id_clean' in processed_df.columns:
                 valid_loans = processed_df['reference_id_clean'].notna().sum()
                 total_rows = len(processed_df)
+                unique_loan_ids = processed_df['reference_id_clean'].nunique()
+                
+                # Detect TRUE duplicates - same RRN/transaction ID appearing multiple times
+                # (NOT same loan_id - multiple payments per loan is valid!)
+                duplicate_analysis = self._analyze_transaction_duplicates(processed_df)
                 
                 result['loan_id_stats'] = {
                     'total_rows': total_rows,
                     'valid_loan_ids': valid_loans,
                     'invalid_loan_ids': total_rows - valid_loans,
                     'success_rate': (valid_loans / total_rows * 100) if total_rows > 0 else 0,
-                    'unique_loan_ids': processed_df['reference_id_clean'].nunique()
+                    'unique_loan_ids': unique_loan_ids,
+                    'duplicate_transactions': duplicate_analysis['duplicate_count'],
+                    'loans_with_multiple_payments': duplicate_analysis['loans_with_multiple_payments']
                 }
+                
+                # Store duplicate details for debugging
+                result['duplicate_analysis'] = duplicate_analysis
+                
+                # Print warning only if TRUE duplicates found (same transaction twice)
+                if duplicate_analysis['duplicate_count'] > 0:
+                    print(f"⚠️ WARNING: Found {duplicate_analysis['duplicate_count']} DUPLICATE TRANSACTIONS (same RRN)!")
+                    print(f"   These may cause incorrect QR totals.")
+                
+                # Info about multiple payments (this is normal)
+                if duplicate_analysis['loans_with_multiple_payments'] > 0:
+                    print(f"ℹ️ INFO: {duplicate_analysis['loans_with_multiple_payments']} loans have multiple payments (normal - partial EMI payments)")
         
         return result
     
@@ -148,3 +167,51 @@ class SIBQRProcessor:
         # Remove common prefixes/suffixes if needed
         # This can be customized based on your data patterns
         return ref_str if ref_str else None
+    
+    def _analyze_transaction_duplicates(self, processed_df: pd.DataFrame) -> dict:
+        """
+        Analyze for TRUE duplicates - same transaction (RRN) appearing multiple times.
+        Multiple payments for same loan_id is VALID (partial EMI payments).
+        
+        Returns:
+            Dictionary with duplicate transaction analysis
+        """
+        result = {
+            'duplicate_count': 0,
+            'duplicate_transactions': [],
+            'loans_with_multiple_payments': 0,
+            'multiple_payment_details': []
+        }
+        
+        try:
+            # Find RRN column (unique transaction identifier)
+            rrn_col = None
+            for col in processed_df.columns:
+                col_lower = col.lower().replace(' ', '').replace('_', '')
+                if 'rrn' in col_lower or 'transactionid' in col_lower or 'txnid' in col_lower:
+                    rrn_col = col
+                    break
+            
+            # Check for TRUE duplicates (same RRN appearing twice = same transaction recorded twice)
+            if rrn_col and rrn_col in processed_df.columns:
+                rrn_counts = processed_df[rrn_col].value_counts()
+                duplicate_rrns = rrn_counts[rrn_counts > 1]
+                
+                if not duplicate_rrns.empty:
+                    result['duplicate_count'] = len(duplicate_rrns)
+                    result['duplicate_transactions'] = duplicate_rrns.to_dict()
+            
+            # Count loans with multiple payments (this is NORMAL, not an error)
+            if 'reference_id_clean' in processed_df.columns:
+                loan_counts = processed_df['reference_id_clean'].value_counts()
+                loans_multiple = loan_counts[loan_counts > 1]
+                result['loans_with_multiple_payments'] = len(loans_multiple)
+                
+                # Store details of loans with multiple payments for info
+                if not loans_multiple.empty:
+                    result['multiple_payment_details'] = loans_multiple.head(10).to_dict()
+                    
+        except Exception as e:
+            print(f"⚠️ Error in duplicate analysis: {e}")
+        
+        return result

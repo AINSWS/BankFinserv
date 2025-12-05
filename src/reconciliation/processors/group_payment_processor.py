@@ -265,11 +265,9 @@ class GroupPaymentProcessor:
         summary += f"   • Records resolved: {newly_matched}\n"
         summary += f"   • Records still mismatched: {remaining_mismatched}\n"
         
+        # Only show summary count, not individual groups (to reduce log verbosity)
         if analysis.get('group_details'):
-            summary += f"\n📋 Resolved Groups:\n"
-            for group in analysis['group_details']:
-                summary += f"   • Group {group['group_id']}: {group['member_count']} members, "
-                summary += f"₹{group['total_system_entry']:.0f} system, ₹{group['total_qr_collection']:.0f} QR "
-                summary += f"(diff: ₹{group['group_difference']:.0f})\n"
+            total_groups = len(analysis['group_details'])
+            summary += f"   • ✅ {total_groups} groups resolved via group payment matching\n"
         
         return summary

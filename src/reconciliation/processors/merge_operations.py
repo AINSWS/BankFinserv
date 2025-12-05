@@ -156,17 +156,21 @@ class MergeOperationsHandler:
                 merged_df = merged_result['merged_data']
                 
                 # Find amount and reference ID columns
-                print(f"   • Available columns after merge: {list(merged_df.columns)}")
                 amount_col = self._find_amount_column(merged_df)
                 ref_id_col = self._find_reference_id_column(merged_df)
                 
-                print(f"   • Amount column selected: {amount_col}")
-                print(f"   • Reference ID column: {ref_id_col}")
+                # CRITICAL: If no amount column found, return empty pivot
+                if amount_col is None:
+                    print(f"   ⚠️ ERROR: No SIB QR amount column found! Cannot create QR pivot.")
+                    result['debug_info']['error_message'] = "No SIB QR amount column found in merged data"
+                    # Return empty pivot with correct structure
+                    empty_pivot = pd.DataFrame(columns=['loan_id', 'total_amount', 'transaction_count'])
+                    result['status'] = 'success'
+                    result['pivot_data'] = empty_pivot
+                    result['summary_stats'] = {'total_unique_loans': 0, 'total_amount': 0}
+                    return result
                 
                 if amount_col and ref_id_col:
-                    print(f"   • Grouping by: {ref_id_col}")
-                    print(f"   • Summing: {amount_col}")
-                    
                     # Find a different column to count (not the same as group column)
                     count_col = None
                     for col in merged_df.columns:
@@ -338,9 +342,6 @@ class MergeOperationsHandler:
                 merged_loan_col = self._find_loan_id_column(merged_pivot_df)
                 
                 if bank_loan_col and merged_loan_col:
-                    print(f"   • Bank pivot loan column: {bank_loan_col}")
-                    print(f"   • QR/Demand pivot loan column: {merged_loan_col}")
-                    
                     # Perform LEFT JOIN to prioritize bank ledger records
                     merged_pivot_comparison = self.merger.dynamic_merge(
                         left_df=bank_pivot_df,
@@ -365,10 +366,18 @@ class MergeOperationsHandler:
                         # Determine reconciliation status - strict banking standards
                         def get_reconciliation_status(row):
                             system_amt = row['system_amount']
-                            qr_amt = row['qr_amount']  # Will be 0 if QR ID is absent
+                            qr_amt = row['qr_amount']  # Will be 0 if loan not in SIB QR
                             difference = system_amt - qr_amt
                             
-                            if difference == 0:
+                            # IMPORTANT: If QR amount is 0 but system has amount,
+                            # this means loan is NOT in SIB QR report - mark as NO QR COLLECTION
+                            if system_amt > 0 and qr_amt == 0:
+                                return "MISMATCH - No QR Collection"
+                            elif system_amt == 0 and qr_amt > 0:
+                                return "MISMATCH - No System Entry"
+                            elif system_amt == 0 and qr_amt == 0:
+                                return "MISMATCH - No Data"  # Should not happen normally
+                            elif difference == 0:
                                 return "MATCHED - Perfect Match"
                             elif abs(difference) == 1 or abs(difference) == 2:  # STRICTLY only ±1, ±2 allowed
                                 return "MATCHED - Minor Difference"
@@ -606,26 +615,32 @@ class MergeOperationsHandler:
         return None
     
     def _find_amount_column(self, df):
-        """Find amount column in DataFrame - for QR/Demand merged data"""
-        print(f"   DEBUG: Looking for amount column in: {list(df.columns)}")
+        """Find amount column in DataFrame - for SIB QR merged data
         
-        # Since QR Report appears to not have amount column, we need to use what's available
-        # Check for QR amount columns first, then fall back to demand amounts
-        amount_patterns = [
-            'amount',           # QR Report amount (if exists)
-            'txn_amount',       # Transaction amount
+        IMPORTANT: Only use SIB QR amount columns, NOT Demand Report amounts!
+        Demand Report is only for enrichment (group/branch info), not amounts.
+        """
+        # ONLY use SIB QR amount columns - DO NOT fall back to demand report amounts!
+        # The order matters - check most specific patterns first
+        sib_qr_amount_patterns = [
+            'amount',           # SIB QR Report amount
+            'txn_amount',       # Transaction amount from SIB
             'transaction_amount',
-            'value',            # Generic value
-            'mldi_amount'       # Demand report amount (fallback)
+            'value',            # Generic value from SIB
         ]
         
-        for pattern in amount_patterns:
+        # Patterns to EXCLUDE (Demand Report columns)
+        exclude_patterns = ['mldi', 'demand', 'outstanding', 'balance', 'mls']
+        
+        for pattern in sib_qr_amount_patterns:
             matching_cols = [col for col in df.columns if pattern.lower() in col.lower()]
+            # Filter out demand report columns
+            matching_cols = [col for col in matching_cols 
+                           if not any(excl in col.lower() for excl in exclude_patterns)]
             if matching_cols:
-                print(f"   DEBUG: Selected amount column '{matching_cols[0]}' from pattern '{pattern}'")
                 return matching_cols[0]
         
-        print(f"   DEBUG: No amount column found!")
+        print(f"   ⚠️ WARNING: No SIB QR amount column found! QR amounts will be 0.")
         return None
     
     def _find_reference_id_column(self, df):
